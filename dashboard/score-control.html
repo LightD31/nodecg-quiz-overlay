@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Score Control</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        body {
+            margin: 0;
+            padding: 10px;
+            background: #1a1a2e;
+            color: #eee;
+        }
+        .team {
+            background: #16213e;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        .team-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        input[type="color"] {
+            width: 36px;
+            height: 36px;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            padding: 0;
+            background: transparent;
+        }
+        input[type="color"]::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+        input[type="color"]::-webkit-color-swatch {
+            border: 2px solid #444;
+            border-radius: 50%;
+        }
+        input[type="text"] {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #333;
+            border-radius: 4px;
+            background: #0f0f23;
+            color: #fff;
+            font-size: 13px;
+        }
+        .score-display {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        .score-value {
+            font-size: 48px;
+            font-weight: bold;
+            color: #fff;
+        }
+        .score-controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.2s;
+            min-width: 45px;
+        }
+        .btn-add {
+            background: #00ff88;
+            color: #000;
+        }
+        .btn-add:hover {
+            background: #00cc6a;
+        }
+        .btn-sub {
+            background: #ff4757;
+            color: #fff;
+        }
+        .btn-sub:hover {
+            background: #cc3a47;
+        }
+        .btn-reset {
+            background: #ffa502;
+            color: #000;
+            font-size: 12px;
+            padding: 8px 16px;
+        }
+        .btn-reset:hover {
+            background: #cc8400;
+        }
+        .reset-all {
+            text-align: center;
+            padding-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="team team-1">
+        <div class="team-header">
+            <input type="color" id="team1Color" value="#00d9ff" title="Team 1 Color">
+            <input type="text" id="team1Name" placeholder="Team 1 Name">
+        </div>
+        <div class="score-display">
+            <div class="score-value" id="team1Score">0</div>
+        </div>
+        <div class="score-controls">
+            <button class="btn btn-sub" data-team="1" data-action="sub">−</button>
+            <button class="btn btn-add" data-team="1" data-action="add">+</button>
+        </div>
+    </div>
+
+    <div class="team team-2">
+        <div class="team-header">
+            <input type="color" id="team2Color" value="#ff6b6b" title="Team 2 Color">
+            <input type="text" id="team2Name" placeholder="Team 2 Name">
+        </div>
+        <div class="score-display">
+            <div class="score-value" id="team2Score">0</div>
+        </div>
+        <div class="score-controls">
+            <button class="btn btn-sub" data-team="2" data-action="sub">−</button>
+            <button class="btn btn-add" data-team="2" data-action="add">+</button>
+        </div>
+    </div>
+
+    <div class="reset-all">
+        <button id="resetScores" class="btn btn-reset">Reset All Scores</button>
+    </div>
+
+    <script>
+        const scoresRep = nodecg.Replicant('scores', {
+            defaultValue: {
+                team1: { name: 'Team 1', score: 0, color: '#00d9ff' },
+                team2: { name: 'Team 2', score: 0, color: '#ff6b6b' }
+            }
+        });
+
+        const team1Name = document.getElementById('team1Name');
+        const team2Name = document.getElementById('team2Name');
+        const team1Score = document.getElementById('team1Score');
+        const team2Score = document.getElementById('team2Score');
+        const team1Color = document.getElementById('team1Color');
+        const team2Color = document.getElementById('team2Color');
+
+        scoresRep.on('change', (newVal) => {
+            if (!newVal) return;
+            
+            team1Name.value = newVal.team1.name || 'Team 1';
+            team2Name.value = newVal.team2.name || 'Team 2';
+            team1Score.textContent = newVal.team1.score || 0;
+            team2Score.textContent = newVal.team2.score || 0;
+            team1Color.value = newVal.team1.color || '#00d9ff';
+            team2Color.value = newVal.team2.color || '#ff6b6b';
+        });
+
+        team1Name.addEventListener('input', () => {
+            if (scoresRep.value) {
+                scoresRep.value.team1.name = team1Name.value;
+            }
+        });
+
+        team2Name.addEventListener('input', () => {
+            if (scoresRep.value) {
+                scoresRep.value.team2.name = team2Name.value;
+            }
+        });
+
+        team1Color.addEventListener('input', () => {
+            if (scoresRep.value) {
+                scoresRep.value.team1.color = team1Color.value;
+            }
+        });
+
+        team2Color.addEventListener('input', () => {
+            if (scoresRep.value) {
+                scoresRep.value.team2.color = team2Color.value;
+            }
+        });
+
+        document.querySelectorAll('.btn-add, .btn-sub').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const team = btn.dataset.team;
+                const action = btn.dataset.action;
+                const delta = action === 'add' ? 1 : -1;
+                
+                if (scoresRep.value) {
+                    const teamKey = `team${team}`;
+                    scoresRep.value[teamKey].score = Math.max(0, scoresRep.value[teamKey].score + delta);
+                }
+            });
+        });
+
+        document.getElementById('resetScores').addEventListener('click', () => {
+            if (scoresRep.value) {
+                scoresRep.value.team1.score = 0;
+                scoresRep.value.team2.score = 0;
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,384 @@
+{
+  "questions": [
+    {
+      "phase": 1,
+      "type": "multipleChoice",
+      "text": "Quelle actrice a joué dans 'Quand Harry rencontre Sally' et 'Nuit blanche à Seattle'?",
+      "propositions": ["Kate Winslet", "Julia Roberts", "Sandra Bullock", "Meg Ryan"],
+      "correctAnswer": 3
+    },
+    {
+      "phase": 1,
+      "type": "multipleChoice",
+      "text": "En quelle année le film 'Toy Story' est-il sorti en France?",
+      "propositions": ["1999", "1997", "1993", "1995"],
+      "correctAnswer": 3
+    },
+    {
+      "phase": 1,
+      "type": "multipleChoice",
+      "text": "Quel est le prénom du zèbre dans 'Madagascar'?",
+      "propositions": ["Melman", "Marty", "Alex", "Gloria"],
+      "correctAnswer": 0
+    },
+    {
+      "phase": 1,
+      "type": "multipleChoice",
+      "text": "Dans l'univers Marvel, qui est Black Widow?",
+      "propositions": ["Shuri", "Carol Danvers", "Natasha Romanoff", "Wanda Maximoff"],
+      "correctAnswer": 2
+    },
+    {
+      "phase": 1,
+      "type": "multipleChoice",
+      "text": "Qui a réalisé le film 'King Kong' sorti en 2005?",
+      "propositions": ["Peter Jackson", "Martin Scorsese", "Steven Spielberg", "James Cameron"],
+      "correctAnswer": 0
+    },
+    {
+      "phase": 1,
+      "type": "multipleChoice",
+      "text": "Qui joue l'héroïne dans 'Les Hunger Games'?",
+      "propositions": ["Emma Watson", "Jennifer Lawrence", "Scarlett Johansson", "Natalie Portman"],
+      "correctAnswer": 1
+    },
+    {
+      "phase": 1,
+      "type": "multipleChoice",
+      "text": "Qui a réalisé 'Les Bronzés' et 'Les Bronzés font du ski'?",
+      "propositions": ["Cédric Klapisch", "Patrice Leconte", "Louis de Funès", "Claude Zidi"],
+      "correctAnswer": 1
+    },
+    {
+      "phase": 1,
+      "type": "multipleChoice",
+      "text": "Qui a réalisé le film Titanic?",
+      "propositions": ["George Lucas", "Martin Scorsese", "Steven Spielberg", "James Cameron"],
+      "correctAnswer": 3
+    },
+    {
+      "phase": 1,
+      "type": "multipleChoice",
+      "text": "Quel est le premier film d'animation des studios Disney?",
+      "propositions": ["La Belle et la Bête", "Blanche-Neige et les Sept Nains", "Le Roi Lion", "Cendrillon"],
+      "correctAnswer": 1
+    },
+    {
+      "phase": 1,
+      "type": "multipleChoice",
+      "text": "Dans quel film trouve-t-on le personnage de Jack Sparrow?",
+      "propositions": ["Le Seigneur des Anneaux", "Pirates des Caraïbes", "Les Aventuriers de l'Arche perdue", "Indiana Jones et la Dernière Croisade"],
+      "correctAnswer": 1
+    },
+    {
+      "phase": 1,
+      "type": "multipleChoice",
+      "text": "Quel film a remporté l'Oscar du meilleur film en 2020?",
+      "propositions": ["Parasite", "1917", "Joker", "Once Upon a Time in Hollywood"],
+      "correctAnswer": 0
+    },
+    {
+      "phase": 1,
+      "type": "multipleChoice",
+      "text": "Qui incarne Neo dans la saga Matrix?",
+      "propositions": ["Johnny Depp", "Brad Pitt", "Keanu Reeves", "Leonardo DiCaprio"],
+      "correctAnswer": 2
+    },
+    {
+      "phase": 1,
+      "type": "multipleChoice",
+      "text": "Quel est le titre du premier film de la saga Star Wars?",
+      "propositions": ["Un nouvel espoir", "Le Retour du Jedi", "L'Empire contre-attaque", "La Menace Fantôme"],
+      "correctAnswer": 0
+    },
+    {
+      "phase": 1,
+      "type": "multipleChoice",
+      "text": "Quel animal est Simba dans Le Roi Lion?",
+      "propositions": ["Un éléphant", "Un ours", "Un lion", "Un tigre"],
+      "correctAnswer": 2
+    },
+    {
+      "phase": 1,
+      "type": "multipleChoice",
+      "text": "Dans quelle ville se déroule l'action principale du film La La Land?",
+      "propositions": ["New York", "Chicago", "Los Angeles", "San Francisco"],
+      "correctAnswer": 2
+    },
+    {
+      "phase": 1,
+      "type": "multipleChoice",
+      "text": "Dans quel film trouve-t-on le personnage de Neo?",
+      "propositions": ["Matrix", "Inception", "Total Recall", "Blade Runner"],
+      "correctAnswer": 0
+    },
+    {
+      "phase": 1,
+      "type": "multipleChoice",
+      "text": "Quel film a popularisé la chanson 'My Heart Will Go On'?",
+      "propositions": ["Romeo + Juliette", "Ghost", "Titanic", "The Bodyguard"],
+      "correctAnswer": 2
+    },
+    {
+      "phase": 1,
+      "type": "multipleChoice",
+      "text": "Quel est le titre original du film 'Le fabuleux destin d'Amélie Poulain'?",
+      "propositions": ["Amélie", "Amélie et ses rêves", "Amélie Poulain", "Le Destin d'Amélie"],
+      "correctAnswer": 0
+    },
+    {
+      "phase": 1,
+      "type": "multipleChoice",
+      "text": "Dans quel film de Disney apparaît le méchant Cruella De Vil?",
+      "propositions": ["Les 101 Dalmatiens", "La Belle et la Bête", "La Petite Sirène", "Cendrillon"],
+      "correctAnswer": 0
+    },
+    {
+      "phase": 1,
+      "type": "multipleChoice",
+      "text": "Dans quel film de super-héros Marvel apparaît le méchant Thanos?",
+      "propositions": ["Avengers: Infinity War", "Doctor Strange", "Black Panther", "Spider-Man: Homecoming"],
+      "correctAnswer": 0
+    },
+    {
+      "phase": 1,
+      "type": "multipleChoice",
+      "text": "Quel est le nom du méchant dans 'La Reine des Neiges'?",
+      "propositions": ["Maléfique", "Anna", "Elsa", "Ursula"],
+      "correctAnswer": 2
+    },
+    {
+      "phase": 1,
+      "type": "multipleChoice",
+      "text": "Dans quel film de la saga Harry Potter trouve-t-on le personnage de Voldemort?",
+      "propositions": ["Harry Potter et la Pierre Philosophale", "Harry Potter et le Prisonnier d'Azkaban", "Harry Potter et la Chambre des Secrets", "Harry Potter et la Coupe de Feu"],
+      "correctAnswer": 0
+    },
+    {
+      "phase": 1,
+      "type": "multipleChoice",
+      "text": "Dans quel film d'animation apparaît le personnage de Maléfique?",
+      "propositions": ["Blanche-Neige", "Cendrillon", "La Belle au bois dormant", "La Petite Sirène"],
+      "correctAnswer": 2
+    },
+    {
+      "phase": 1,
+      "type": "multipleChoice",
+      "text": "Quel est le nom du méchant dans 'Les Indestructibles'?",
+      "propositions": ["Le Méchant", "Syndrome", "Le Vilain", "Le Bouffon"],
+      "correctAnswer": 1
+    },
+    {
+      "phase": 1,
+      "type": "multipleChoice",
+      "text": "Dans quelle saga trouve-t-on le personnage de Voldemort?",
+      "propositions": ["Le Seigneur des Anneaux", "Pirates des Caraïbes", "Star Wars", "Harry Potter"],
+      "correctAnswer": 3
+    },
+    {
+      "phase": 1,
+      "type": "multipleChoice",
+      "text": "Quelle princesse chante la chanson 'Ce rêve bleu'?",
+      "propositions": ["Belle", "Cendrillon", "Ariel", "Jasmine"],
+      "correctAnswer": 3
+    },
+    {
+      "phase": 1,
+      "type": "multipleChoice",
+      "text": "Dans quel lieu se déroule l'intrigue du dessin animé 'Aladin'?",
+      "propositions": ["Babylone", "Agrabah", "Persépolis", "Atlantis"],
+      "correctAnswer": 1
+    },
+    {
+      "phase": 1,
+      "type": "multipleChoice",
+      "text": "Quel objet magique est associé au personnage de Maoui dans 'Vaiana'?",
+      "propositions": ["Une lampe magique", "Un hameçon magique", "Une baguette magique", "Une épée magique"],
+      "correctAnswer": 1
+    },
+
+    {
+      "phase": 2,
+      "type": "threeWordsClue",
+      "text": "3 mots pour un film",
+      "clues": ["Fantôme", "Poterie", "Idem"],
+      "answer": "Ghost"
+    },
+    {
+      "phase": 2,
+      "type": "threeWordsClue",
+      "text": "3 mots pour un film",
+      "clues": ["Capitaine", "Carpe Diem", "Théâtre"],
+      "answer": "Le cercle des poètes disparus"
+    },
+    {
+      "phase": 2,
+      "type": "threeWordsClue",
+      "text": "3 mots pour un film",
+      "clues": ["Tueurs", "Psychiatre", "Papillons"],
+      "answer": "Le silence des Agneaux"
+    },
+    {
+      "phase": 2,
+      "type": "threeWordsClue",
+      "text": "3 mots pour un film",
+      "clues": ["Copines", "Voiture", "Grand Canyon"],
+      "answer": "Thelma et Louise"
+    },
+    {
+      "phase": 2,
+      "type": "threeWordsClue",
+      "text": "3 mots pour un film",
+      "clues": ["Douche", "Mère", "Motel"],
+      "answer": "Psychose"
+    },
+    {
+      "phase": 2,
+      "type": "threeWordsClue",
+      "text": "3 mots pour un film",
+      "clues": ["Cannes", "Mime", "Chewing-gum"],
+      "answer": "La cité de la peur"
+    },
+    {
+      "phase": 2,
+      "type": "threeWordsClue",
+      "text": "3 mots pour un film",
+      "clues": ["Katana", "Mariage", "Jaune"],
+      "answer": "Kill Bill"
+    },
+    {
+      "phase": 2,
+      "type": "threeWordsClue",
+      "text": "3 mots pour un film",
+      "clues": ["Vague", "FBI", "Présidents"],
+      "answer": "Point Break"
+    },
+    {
+      "phase": 2,
+      "type": "threeWordsClue",
+      "text": "3 mots pour un film",
+      "clues": ["Sœurs", "Arbres", "Vinyle"],
+      "answer": "Virgin Suicide"
+    },
+    {
+      "phase": 2,
+      "type": "threeWordsClue",
+      "text": "3 mots pour un film",
+      "clues": ["Courte-paille", "Château", "Bague"],
+      "answer": "Les Visiteurs"
+    },
+    {
+      "phase": 2,
+      "type": "threeWordsClue",
+      "text": "3 mots pour un film",
+      "clues": ["Ascenseur", "Bus", "Métro"],
+      "answer": "Speed"
+    },
+    {
+      "phase": 2,
+      "type": "threeWordsClue",
+      "text": "3 mots pour un film",
+      "clues": ["Godard", "Lunette", "Sous-marin"],
+      "answer": "Le Redoutable"
+    },
+    {
+      "phase": 2,
+      "type": "threeWordsClue",
+      "text": "3 mots pour un film",
+      "clues": ["Lamborghini", "Russie", "Noël"],
+      "answer": "Rocky IV"
+    },
+
+    {
+      "phase": 3,
+      "type": "funnySummary",
+      "text": "Résumé foireux",
+      "summary": "Un pauvre gars se sacrifie pour sauver le monde parce qu'un autre n'a pas écouter les consignes !",
+      "answer": "Avengers End Game"
+    },
+    {
+      "phase": 3,
+      "type": "funnySummary",
+      "text": "Résumé foireux",
+      "summary": "Un thriller avec pleins de personnages et pourtant ça n'a quasiment rien coûté pour le casting !",
+      "answer": "Split"
+    },
+    {
+      "phase": 3,
+      "type": "funnySummary",
+      "text": "Résumé foireux",
+      "summary": "C'est l'histoire d'un couple où tu sais dès le début que la fille va mourir",
+      "answer": "Love Story"
+    },
+    {
+      "phase": 3,
+      "type": "funnySummary",
+      "text": "Résumé foireux",
+      "summary": "Un film où les personnages découvrent que le héros est leur père depuis le début et il n'y a pas de sabre laser !",
+      "answer": "Madame Doubtfire"
+    },
+    {
+      "phase": 3,
+      "type": "funnySummary",
+      "text": "Résumé foireux",
+      "summary": "C'est l'histoire de 2 plombiers qui affrontent une grosse tortue",
+      "answer": "Super Mario Bros"
+    },
+    {
+      "phase": 3,
+      "type": "funnySummary",
+      "text": "Résumé foireux",
+      "summary": "Le seul film qui a fait souhaiter à tous les gamins du monde de se faire oublier par leurs parents à la maison",
+      "answer": "Maman j'ai raté l'avion"
+    },
+    {
+      "phase": 3,
+      "type": "funnySummary",
+      "text": "Résumé foireux",
+      "summary": "Un film où Tom Hanks est partout",
+      "answer": "Le Pôle Express"
+    },
+    {
+      "phase": 3,
+      "type": "funnySummary",
+      "text": "Résumé foireux",
+      "summary": "Un handicapé trouve une colonie de schtroumpfs",
+      "answer": "Avatar"
+    },
+    {
+      "phase": 3,
+      "type": "funnySummary",
+      "text": "Résumé foireux",
+      "summary": "C'est le meurtre de JFK mais en version française",
+      "answer": "I comme Icare"
+    },
+    {
+      "phase": 3,
+      "type": "funnySummary",
+      "text": "Résumé foireux",
+      "summary": "C'est un film qui raconte l'histoire d'une expédition de tarés, réalisé par un taré et interprété par un taré encore plus grand que tous les autres réunis",
+      "answer": "Aguirre, la colère de Dieu"
+    },
+    {
+      "phase": 3,
+      "type": "funnySummary",
+      "text": "Résumé foireux",
+      "summary": "C'est l'histoire d'un « putain » de nuage qui n'a pas bougé depuis 15 jours",
+      "answer": "Nope"
+    },
+    {
+      "phase": 3,
+      "type": "funnySummary",
+      "text": "Résumé foireux",
+      "summary": "C'est un mec qui se venge sur la musique de la pub Royal canin",
+      "answer": "Le Professionnel"
+    },
+    {
+      "phase": 3,
+      "type": "funnySummary",
+      "text": "Résumé foireux",
+      "summary": "C'est une bande de pote qui met plus d'énergie à tricher au bac qu'à réviser le bac",
+      "answer": "Les sous-doués"
+    }
+  ]
+}

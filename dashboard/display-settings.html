@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Display Settings</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        body {
+            margin: 0;
+            padding: 10px;
+            background: #1a1a2e;
+            color: #eee;
+        }
+        .section {
+            background: #16213e;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        h3 {
+            margin: 0 0 15px 0;
+            color: #00d9ff;
+            font-size: 14px;
+            text-transform: uppercase;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 12px;
+            color: #aaa;
+        }
+        select {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #333;
+            border-radius: 4px;
+            background: #0f0f23;
+            color: #fff;
+            font-size: 13px;
+        }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: bold;
+            transition: all 0.2s;
+            margin-right: 10px;
+        }
+        .btn-primary {
+            background: #00d9ff;
+            color: #000;
+        }
+        .btn-primary:hover {
+            background: #00b8d9;
+        }
+        .btn-danger {
+            background: #ff4757;
+            color: #fff;
+        }
+        .btn-danger:hover {
+            background: #cc3a47;
+        }
+        .preview {
+            margin-top: 15px;
+            text-align: center;
+        }
+        .preview img {
+            max-width: 100%;
+            max-height: 100px;
+            border-radius: 8px;
+            border: 2px solid #333;
+        }
+        .preview-placeholder {
+            padding: 30px;
+            background: #0f0f23;
+            border-radius: 8px;
+            color: #666;
+            font-size: 12px;
+        }
+        .info {
+            font-size: 11px;
+            color: #666;
+            margin-top: 5px;
+        }
+        .upload-info {
+            background: #0f0f23;
+            border-radius: 4px;
+            padding: 10px;
+            margin-bottom: 15px;
+            font-size: 11px;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <div class="section">
+        <h3>Participant Display Image</h3>
+        
+        <div class="upload-info">
+            Upload images via NodeCG's <strong>Assets</strong> tab (in the dashboard header), then select them here.
+        </div>
+        
+        <label>Select Image</label>
+        <select id="imageSelect">
+            <option value="">-- No image --</option>
+        </select>
+        
+        <div style="margin-top: 15px;">
+            <button id="clearImage" class="btn btn-danger">Clear Image</button>
+        </div>
+        
+        <div class="preview" id="preview">
+            <div class="preview-placeholder">No image set</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h3>Graphics URLs</h3>
+        <div class="info">
+            <strong>Stream Overlay:</strong><br>
+            <code style="color: #00d9ff; word-break: break-all;">http://localhost:9090/bundles/quiz-overlay/graphics/overlay.html</code>
+        </div>
+        <div class="info" style="margin-top: 10px;">
+            <strong>Participant View:</strong><br>
+            <code style="color: #00d9ff; word-break: break-all;">http://localhost:9090/bundles/quiz-overlay/graphics/participant.html</code>
+        </div>
+    </div>
+
+    <script>
+        const settingsRep = nodecg.Replicant('displaySettings', {
+            defaultValue: { imageUrl: '' }
+        });
+        
+        const assetsRep = nodecg.Replicant('assets:images');
+
+        const imageSelect = document.getElementById('imageSelect');
+        const previewEl = document.getElementById('preview');
+
+        // Populate dropdown with uploaded assets
+        assetsRep.on('change', (newVal) => {
+            if (!newVal) return;
+            
+            const currentValue = imageSelect.value;
+            imageSelect.innerHTML = '<option value="">-- No image --</option>';
+            
+            newVal.forEach(asset => {
+                const option = document.createElement('option');
+                option.value = asset.url;
+                option.textContent = asset.name;
+                imageSelect.appendChild(option);
+            });
+            
+            // Restore selection
+            if (currentValue) {
+                imageSelect.value = currentValue;
+            } else if (settingsRep.value && settingsRep.value.imageUrl) {
+                imageSelect.value = settingsRep.value.imageUrl;
+            }
+        });
+
+        settingsRep.on('change', (newVal) => {
+            if (!newVal) return;
+            
+            imageSelect.value = newVal.imageUrl || '';
+            updatePreview(newVal.imageUrl);
+        });
+        
+        imageSelect.addEventListener('change', () => {
+            if (settingsRep.value) {
+                settingsRep.value.imageUrl = imageSelect.value;
+            }
+        });
+
+        function updatePreview(url) {
+            if (url) {
+                previewEl.innerHTML = `<img src="${url}" alt="Preview" onerror="this.parentElement.innerHTML='<div class=\\'preview-placeholder\\'>Failed to load image</div>'">`;
+            } else {
+                previewEl.innerHTML = '<div class="preview-placeholder">No image set</div>';
+            }
+        }
+
+        document.getElementById('clearImage').addEventListener('click', () => {
+            if (settingsRep.value) {
+                settingsRep.value.imageUrl = '';
+            }
+            imageSelect.value = '';
+        });
+    </script>
+</body>
+</html>

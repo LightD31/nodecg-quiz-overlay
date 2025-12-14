@@ -1,0 +1,53 @@
+{
+  "name": "quiz-overlay",
+  "version": "1.0.0",
+  "description": "Quiz overlay bundle with score tracking for two teams",
+  "nodecg": {
+    "compatibleRange": "^2.0.0",
+    "assetCategories": [
+      {
+        "name": "images",
+        "title": "Images",
+        "allowedTypes": ["jpg", "jpeg", "png", "gif", "svg", "webp"]
+      }
+    ],
+    "dashboardPanels": [
+      {
+        "name": "quiz-control",
+        "title": "Quiz Control",
+        "file": "team-answers.html",
+        "width": 4
+      },
+      {
+        "name": "score-control",
+        "title": "Score Control",
+        "file": "score-control.html",
+        "width": 2
+      },
+      {
+        "name": "display-settings",
+        "title": "Display Settings",
+        "file": "display-settings.html",
+        "width": 2
+      },
+      {
+        "name": "layout-editor",
+        "title": "Layout Editor",
+        "file": "layout-editor.html",
+        "width": 3
+      }
+    ],
+    "graphics": [
+      {
+        "file": "overlay.html",
+        "width": 1920,
+        "height": 1080
+      },
+      {
+        "file": "participant.html",
+        "width": 1920,
+        "height": 1080
+      }
+    ]
+  }
+}

@@ -1,0 +1,1171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Control</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        body {
+            margin: 0;
+            padding: 10px;
+            background: #1a1a2e;
+            color: #eee;
+        }
+        .section {
+            background: #16213e;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        h3 {
+            margin: 0 0 15px 0;
+            font-size: 14px;
+            text-transform: uppercase;
+        }
+        .team1 h3 { color: var(--team1-color, #00d9ff); }
+        .team2 h3 { color: var(--team2-color, #ff6b6b); }
+        
+        /* Question Selector */
+        .question-nav {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .question-nav select {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #333;
+            border-radius: 4px;
+            background: #0f0f23;
+            color: #fff;
+            font-size: 13px;
+        }
+        .nav-btn {
+            padding: 8px 15px;
+            min-width: 40px;
+            background: #00d9ff;
+            color: #000;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .nav-btn:hover {
+            background: #00b8d9;
+        }
+        .question-counter {
+            font-size: 11px;
+            color: #888;
+            text-align: center;
+        }
+        .current-question-preview {
+            background: #0f0f23;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+            font-size: 12px;
+            color: #aaa;
+            max-height: 60px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .current-question-preview .correct-answer {
+            color: #00ff88;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+        
+        /* Status Bar */
+        .status-bar {
+            background: #0f0f23;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            font-size: 12px;
+            text-align: center;
+        }
+        .status-bar.no-question {
+            color: #666;
+        }
+        .status-bar.ready {
+            color: #00ff88;
+        }
+        .status-bar.answered {
+            color: #ffa502;
+        }
+        
+        /* Controls */
+        .controls {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        .control-btn {
+            flex: 1;
+            min-width: 70px;
+            padding: 10px 6px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+            transition: all 0.2s;
+        }
+        .control-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        .btn-hide {
+            background: #ff6b6b;
+            color: white;
+        }
+        .btn-hide:hover:not(:disabled) {
+            background: #ee5a5a;
+        }
+        .btn-show {
+            background: #00d9ff;
+            color: #1a1a2e;
+        }
+        .btn-show:hover:not(:disabled) {
+            background: #00c4e6;
+        }
+        .btn-next {
+            background: #00ff88;
+            color: #1a1a2e;
+        }
+        .btn-next:hover:not(:disabled) {
+            background: #00e67a;
+        }
+        .btn-reveal {
+            background: #ffa502;
+            color: #1a1a2e;
+        }
+        .btn-reveal:hover:not(:disabled) {
+            background: #e69500;
+        }
+        
+        /* Toggle */
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #0f0f23;
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+        .toggle-label {
+            font-size: 11px;
+            color: #aaa;
+        }
+        .toggle-switch {
+            position: relative;
+            width: 44px;
+            height: 24px;
+        }
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #444;
+            transition: 0.3s;
+            border-radius: 24px;
+        }
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: 0.3s;
+            border-radius: 50%;
+        }
+        .toggle-switch input:checked + .toggle-slider {
+            background-color: #00ff88;
+        }
+        .toggle-switch input:checked + .toggle-slider:before {
+            transform: translateX(20px);
+        }
+        
+        /* Team Answer Buttons */
+        .answer-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+        .answer-btn {
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 20px;
+            font-weight: bold;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .team1 .answer-btn {
+            background: color-mix(in srgb, var(--team1-color, #00d9ff) 20%, transparent);
+            color: var(--team1-color, #00d9ff);
+            border: 2px solid var(--team1-color, #00d9ff);
+        }
+        .team1 .answer-btn:hover:not(:disabled) {
+            background: color-mix(in srgb, var(--team1-color, #00d9ff) 40%, transparent);
+        }
+        .team2 .answer-btn {
+            background: color-mix(in srgb, var(--team2-color, #ff6b6b) 20%, transparent);
+            color: var(--team2-color, #ff6b6b);
+            border: 2px solid var(--team2-color, #ff6b6b);
+        }
+        .team2 .answer-btn:hover:not(:disabled) {
+            background: color-mix(in srgb, var(--team2-color, #ff6b6b) 40%, transparent);
+        }
+        .answer-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+        .answer-btn.correct {
+            background: rgba(0, 255, 136, 0.4) !important;
+            border-color: #00ff88 !important;
+            color: #00ff88 !important;
+        }
+        .answer-btn.wrong {
+            background: rgba(255, 71, 87, 0.4) !important;
+            border-color: #ff4757 !important;
+            color: #ff4757 !important;
+        }
+        
+        /* Results */
+        .result {
+            text-align: center;
+            padding: 8px;
+            margin-top: 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 12px;
+            display: none;
+        }
+        .result.show {
+            display: block;
+        }
+        .result.correct {
+            background: rgba(0, 255, 136, 0.2);
+            color: #00ff88;
+        }
+        .result.wrong {
+            background: rgba(255, 71, 87, 0.2);
+            color: #ff4757;
+        }
+        
+        .answer-btn.hidden {
+            display: none;
+        }
+        
+        /* Open Question Mode (phases 2 & 3) */
+        .open-question-mode {
+            display: none;
+            text-align: center;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+        }
+        
+        .open-question-mode.active {
+            display: block;
+        }
+        
+        .open-question-answer {
+            font-size: 14px;
+            color: #00ff88;
+            margin-bottom: 10px;
+            padding: 10px;
+            background: rgba(0, 255, 136, 0.1);
+            border-radius: 6px;
+            border: 1px solid rgba(0, 255, 136, 0.3);
+        }
+        
+        .open-question-label {
+            font-size: 11px;
+            color: #888;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+        
+        .score-btn-row {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+        }
+        
+        .score-btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+        
+        .score-btn.correct-btn {
+            background: #00ff88;
+            color: #1a1a2e;
+        }
+        
+        .score-btn.correct-btn:hover {
+            background: #00e67a;
+        }
+        
+        .score-btn.wrong-btn {
+            background: #ff4757;
+            color: #fff;
+        }
+        
+        .score-btn.wrong-btn:hover {
+            background: #ee3344;
+        }
+        
+        /* Phase indicator */
+        .phase-indicator {
+            text-align: center;
+            padding: 8px;
+            margin-bottom: 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        
+        .phase-indicator.phase-1 {
+            background: rgba(0, 217, 255, 0.2);
+            color: #00d9ff;
+        }
+        
+        .phase-indicator.phase-2 {
+            background: rgba(255, 165, 2, 0.2);
+            color: #ffa502;
+        }
+        
+        .phase-indicator.phase-3 {
+            background: rgba(255, 107, 107, 0.2);
+            color: #ff6b6b;
+        }
+        
+        /* Clues preview */
+        .clues-preview {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+        
+        .clue-tag {
+            background: rgba(0, 217, 255, 0.2);
+            color: #00d9ff;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .summary-preview {
+            font-style: italic;
+            color: #ffa502;
+            font-size: 12px;
+            padding: 8px;
+            background: rgba(255, 165, 2, 0.1);
+            border-radius: 6px;
+            margin-bottom: 10px;
+        }
+        
+        /* Team Score */
+        .team-score {
+            text-align: center;
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        .team1 .team-score { color: var(--team1-color, #00d9ff); }
+        .team2 .team-score { color: var(--team2-color, #ff6b6b); }
+        
+        /* Teams Container */
+        .teams-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .teams-container .section {
+            margin-bottom: 0;
+        }
+        
+        /* File Selector */
+        .file-selector {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        .file-selector select {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #333;
+            border-radius: 4px;
+            background: #0f0f23;
+            color: #fff;
+            font-size: 13px;
+        }
+        .file-selector .load-btn {
+            padding: 8px 15px;
+            background: #00ff88;
+            color: #000;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 12px;
+        }
+        .file-selector .load-btn:hover {
+            background: #00e67a;
+        }
+        .file-selector .refresh-btn {
+            padding: 8px 12px;
+            background: #666;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .file-selector .refresh-btn:hover {
+            background: #888;
+        }
+        .current-file {
+            font-size: 11px;
+            color: #00ff88;
+            margin-top: 8px;
+        }
+    </style>
+</head>
+<body>
+    <!-- File Selector -->
+    <div class="section">
+        <h3 style="color: #ffa502;">Question File</h3>
+        <div class="file-selector">
+            <select id="fileSelect">
+                <option value="">-- Select a file --</option>
+            </select>
+            <button class="load-btn" id="btnLoadFile">Load</button>
+            <button class="refresh-btn" id="btnRefreshFiles">↻</button>
+        </div>
+        <div class="current-file" id="currentFileDisplay">No file loaded</div>
+    </div>
+
+    <!-- Question Selector -->
+    <div class="section">
+        <h3 style="color: #00d9ff;">Question Selector</h3>
+        <div class="question-nav">
+            <button id="prevQuestion" class="nav-btn">◀</button>
+            <select id="questionSelect">
+                <option value="-1">-- Select a question --</option>
+            </select>
+            <button id="nextQuestion" class="nav-btn">▶</button>
+        </div>
+        <div class="question-counter" id="questionCounter">No questions loaded</div>
+        <div class="current-question-preview" id="questionPreview">
+            <div id="previewText">Select a question to preview</div>
+            <div class="correct-answer" id="previewAnswer"></div>
+        </div>
+    </div>
+
+    <!-- Status Bar -->
+    <div class="status-bar" id="statusBar">No question active</div>
+    
+    <!-- Phase Indicator -->
+    <div class="phase-indicator phase-1" id="phaseIndicator">Phase 1 - QCM</div>
+    
+    <!-- Clues/Summary Preview (for phases 2 & 3) -->
+    <div class="clues-preview" id="cluesPreview" style="display: none;"></div>
+    <div class="summary-preview" id="summaryPreview" style="display: none;"></div>
+
+    <!-- Controls -->
+    <div class="controls">
+        <button class="control-btn btn-hide" id="btnHide">Hide</button>
+        <button class="control-btn btn-show" id="btnShow">Show</button>
+        <button class="control-btn btn-reveal" id="btnReveal">Reveal</button>
+        <button class="control-btn btn-next" id="btnNext">Next</button>
+    </div>
+
+    <!-- Toggle -->
+    <div class="toggle-container">
+        <span class="toggle-label">Reveal answer on wrong</span>
+        <label class="toggle-switch">
+            <input type="checkbox" id="revealToggle" checked>
+            <span class="toggle-slider"></span>
+        </label>
+    </div>
+
+    <!-- Teams Side by Side -->
+    <div class="teams-container">
+        <div class="section team1">
+            <h3 id="team1Title">Team 1</h3>
+            <div class="team-score" id="team1Score">0</div>
+            
+            <!-- Multiple Choice Mode -->
+            <div class="answer-grid" id="team1AnswerGrid">
+                <button class="answer-btn" data-team="team1" data-answer="0">A</button>
+                <button class="answer-btn" data-team="team1" data-answer="1">B</button>
+                <button class="answer-btn" data-team="team1" data-answer="2">C</button>
+                <button class="answer-btn" data-team="team1" data-answer="3">D</button>
+            </div>
+            
+            <!-- Open Question Mode (phases 2 & 3) -->
+            <div class="open-question-mode" id="team1OpenMode">
+                <div class="open-question-label">Réponse attendue</div>
+                <div class="open-question-answer" id="team1ExpectedAnswer">-</div>
+                <div class="score-btn-row">
+                    <button class="score-btn correct-btn" data-team="team1" data-action="correct">✓ Correct</button>
+                    <button class="score-btn wrong-btn" data-team="team1" data-action="wrong">✗ Faux</button>
+                </div>
+            </div>
+            
+            <div class="result" id="team1Result"></div>
+        </div>
+
+        <div class="section team2">
+            <h3 id="team2Title">Team 2</h3>
+            <div class="team-score" id="team2Score">0</div>
+            
+            <!-- Multiple Choice Mode -->
+            <div class="answer-grid" id="team2AnswerGrid">
+                <button class="answer-btn" data-team="team2" data-answer="0">A</button>
+                <button class="answer-btn" data-team="team2" data-answer="1">B</button>
+                <button class="answer-btn" data-team="team2" data-answer="2">C</button>
+                <button class="answer-btn" data-team="team2" data-answer="3">D</button>
+            </div>
+            
+            <!-- Open Question Mode (phases 2 & 3) -->
+            <div class="open-question-mode" id="team2OpenMode">
+                <div class="open-question-label">Réponse attendue</div>
+                <div class="open-question-answer" id="team2ExpectedAnswer">-</div>
+                <div class="score-btn-row">
+                    <button class="score-btn correct-btn" data-team="team2" data-action="correct">✓ Correct</button>
+                    <button class="score-btn wrong-btn" data-team="team2" data-action="wrong">✗ Faux</button>
+                </div>
+            </div>
+            
+            <div class="result" id="team2Result"></div>
+        </div>
+    </div>
+
+    <script>
+        // Replicants
+        const questionRep = nodecg.Replicant('question');
+        const scoresRep = nodecg.Replicant('scores');
+        const questionsListRep = nodecg.Replicant('questionsList', { defaultValue: [] });
+        const questionFilesRep = nodecg.Replicant('questionFiles', { 
+            defaultValue: { files: [], currentFile: '' } 
+        });
+        
+        // Elements
+        const statusBar = document.getElementById('statusBar');
+        const btnHide = document.getElementById('btnHide');
+        const btnShow = document.getElementById('btnShow');
+        const btnReveal = document.getElementById('btnReveal');
+        const btnNext = document.getElementById('btnNext');
+        const revealToggle = document.getElementById('revealToggle');
+        const team1Title = document.getElementById('team1Title');
+        const team2Title = document.getElementById('team2Title');
+        const team1Score = document.getElementById('team1Score');
+        const team2Score = document.getElementById('team2Score');
+        const team1Result = document.getElementById('team1Result');
+        const team2Result = document.getElementById('team2Result');
+        const allButtons = document.querySelectorAll('.answer-btn');
+        const questionSelect = document.getElementById('questionSelect');
+        const questionCounter = document.getElementById('questionCounter');
+        const previewText = document.getElementById('previewText');
+        const fileSelect = document.getElementById('fileSelect');
+        const btnLoadFile = document.getElementById('btnLoadFile');
+        const btnRefreshFiles = document.getElementById('btnRefreshFiles');
+        const currentFileDisplay = document.getElementById('currentFileDisplay');
+        const previewAnswer = document.getElementById('previewAnswer');
+        
+        // New elements for phases 2 & 3
+        const phaseIndicator = document.getElementById('phaseIndicator');
+        const cluesPreview = document.getElementById('cluesPreview');
+        const summaryPreview = document.getElementById('summaryPreview');
+        const team1AnswerGrid = document.getElementById('team1AnswerGrid');
+        const team2AnswerGrid = document.getElementById('team2AnswerGrid');
+        const team1OpenMode = document.getElementById('team1OpenMode');
+        const team2OpenMode = document.getElementById('team2OpenMode');
+        const team1ExpectedAnswer = document.getElementById('team1ExpectedAnswer');
+        const team2ExpectedAnswer = document.getElementById('team2ExpectedAnswer');
+        const allScoreButtons = document.querySelectorAll('.score-btn');
+        
+        // State
+        let questions = [];
+        let currentIndex = -1;
+        let currentCorrectAnswer = -1;
+        let isCorrectlyAnswered = false;
+        let eliminatedAnswers = [];
+        let currentQuestionType = 'multipleChoice';
+        let currentPhase = 1;
+        let currentAnswer = '';
+        
+        // Answer letters for each question type
+        const answerLetters = ['A', 'B', 'C', 'D'];
+        const trueFalseLabels = ['V', 'F']; // Vrai / Faux
+        
+        // Phase labels
+        const phaseLabels = {
+            1: 'Phase 1 - QCM',
+            2: 'Phase 2 - 3 Mots',
+            3: 'Phase 3 - Résumé foireux'
+        };
+        
+        // Check if question type requires open answer (no A/B/C/D buttons)
+        function isOpenQuestionType(type) {
+            return type === 'threeWordsClue' || type === 'funnySummary';
+        }
+        
+        // Sync the revealOnWrong toggle with the replicant
+        questionRep.on('change', (newVal) => {
+            if (!newVal) return;
+            
+            currentCorrectAnswer = newVal.correctAnswer;
+            eliminatedAnswers = newVal.eliminatedAnswers || [];
+            currentQuestionType = newVal.type || 'multipleChoice';
+            currentPhase = newVal.phase || 1;
+            currentAnswer = newVal.answer || '';
+            
+            // Sync toggle state with replicant
+            if (newVal.revealOnWrong !== undefined) {
+                revealToggle.checked = newVal.revealOnWrong;
+            }
+            
+            if (newVal.state === 'showing' && eliminatedAnswers.length === 0) {
+                isCorrectlyAnswered = false;
+                hideResults();
+            } else if (newVal.state === 'revealed' || newVal.answeredCorrectly) {
+                isCorrectlyAnswered = true;
+            }
+            
+            // Update phase indicator
+            phaseIndicator.textContent = phaseLabels[currentPhase] || `Phase ${currentPhase}`;
+            phaseIndicator.className = `phase-indicator phase-${currentPhase}`;
+            
+            // Update clues/summary preview
+            updateQuestionPreviewUI(newVal);
+            
+            updateButtonStates();
+        });
+        
+        // Update revealOnWrong setting when toggle changes
+        revealToggle.addEventListener('change', async () => {
+            try {
+                await fetch(`/quiz-overlay/api/settings/revealOnWrong?enabled=${revealToggle.checked}`, { method: 'POST' });
+            } catch (error) {
+                console.error('Failed to update revealOnWrong setting:', error);
+            }
+        });
+        
+        // Load questions list
+        questionsListRep.on('change', (newVal) => {
+            if (!newVal) return;
+            questions = newVal;
+            populateQuestionSelect();
+            questionCounter.textContent = `${questions.length} questions loaded`;
+        });
+        
+        function populateQuestionSelect() {
+            questionSelect.innerHTML = '<option value="-1">-- Select a question --</option>';
+            questions.forEach((q, i) => {
+                const option = document.createElement('option');
+                option.value = i;
+                const phasePrefix = q.phase ? `[P${q.phase}] ` : '';
+                const displayText = q.type === 'threeWordsClue' ? q.clues.join(' • ') : 
+                                   q.type === 'funnySummary' ? q.summary.substring(0, 35) + '...' :
+                                   q.text.substring(0, 35);
+                option.textContent = `${i + 1}. ${phasePrefix}${displayText}${displayText.length >= 35 ? '...' : ''}`;
+                questionSelect.appendChild(option);
+            });
+        }
+        
+        function updateQuestionPreviewUI(newVal) {
+            const isOpen = isOpenQuestionType(newVal.type);
+            
+            // Show/hide clues preview
+            if (newVal.type === 'threeWordsClue' && newVal.clues) {
+                cluesPreview.innerHTML = newVal.clues.map(c => `<span class="clue-tag">${c}</span>`).join('');
+                cluesPreview.style.display = 'flex';
+            } else {
+                cluesPreview.style.display = 'none';
+            }
+            
+            // Show/hide summary preview
+            if (newVal.type === 'funnySummary' && newVal.summary) {
+                summaryPreview.textContent = `"${newVal.summary}"`;
+                summaryPreview.style.display = 'block';
+            } else {
+                summaryPreview.style.display = 'none';
+            }
+            
+            // Update expected answer for open questions
+            if (isOpen && newVal.answer) {
+                team1ExpectedAnswer.textContent = newVal.answer;
+                team2ExpectedAnswer.textContent = newVal.answer;
+            }
+        }
+        
+        function updatePreview(index) {
+            if (index < 0 || index >= questions.length) {
+                previewText.textContent = 'Select a question to preview';
+                previewAnswer.textContent = '';
+                return;
+            }
+            const q = questions[index];
+            const questionType = q.type || 'multipleChoice';
+            const isTrueFalse = questionType === 'trueFalse';
+            const isThreeWords = questionType === 'threeWordsClue';
+            const isFunnySummary = questionType === 'funnySummary';
+            
+            // Update preview text based on question type
+            if (isThreeWords) {
+                previewText.textContent = q.clues ? q.clues.join(' • ') : q.text;
+            } else if (isFunnySummary) {
+                previewText.textContent = q.summary || q.text;
+            } else {
+                previewText.textContent = q.text;
+            }
+            
+            // Update correct answer preview
+            let correctLabel;
+            if (isThreeWords || isFunnySummary) {
+                correctLabel = q.answer;
+            } else if (isTrueFalse) {
+                correctLabel = q.correctAnswer === 0 ? 'Vrai' : 'Faux';
+            } else {
+                correctLabel = String.fromCharCode(65 + q.correctAnswer) + ' - ' + q.propositions[q.correctAnswer];
+            }
+            previewAnswer.textContent = `Correct: ${correctLabel}`;
+        }
+        
+        function updateButtonStates() {
+            const hasQuestion = questionRep.value && questionRep.value.text && questionRep.value.state === 'showing';
+            const isHidden = questionRep.value && questionRep.value.state === 'hidden';
+            const isShowing = questionRep.value && questionRep.value.state === 'showing';
+            const isRevealed = questionRep.value && questionRep.value.state === 'revealed';
+            const isTrueFalse = currentQuestionType === 'trueFalse';
+            const isOpen = isOpenQuestionType(currentQuestionType);
+            const maxButtons = isTrueFalse ? 2 : 4;
+            
+            // Show/hide answer grids vs open question mode
+            if (isOpen) {
+                team1AnswerGrid.style.display = 'none';
+                team2AnswerGrid.style.display = 'none';
+                team1OpenMode.classList.add('active');
+                team2OpenMode.classList.add('active');
+            } else {
+                team1AnswerGrid.style.display = 'grid';
+                team2AnswerGrid.style.display = 'grid';
+                team1OpenMode.classList.remove('active');
+                team2OpenMode.classList.remove('active');
+            }
+            
+            // Update answer buttons for multiple choice
+            allButtons.forEach(btn => {
+                const answerIndex = parseInt(btn.dataset.answer);
+                const isEliminated = eliminatedAnswers.includes(answerIndex);
+                
+                // Hide buttons C and D for True/False questions
+                if (answerIndex >= maxButtons) {
+                    btn.classList.add('hidden');
+                    btn.disabled = true;
+                } else {
+                    btn.classList.remove('hidden');
+                    btn.disabled = !hasQuestion || isCorrectlyAnswered || isEliminated || isOpen;
+                    
+                    // Update button labels for True/False
+                    if (isTrueFalse) {
+                        btn.textContent = trueFalseLabels[answerIndex];
+                    } else {
+                        btn.textContent = answerLetters[answerIndex];
+                    }
+                }
+                
+                btn.classList.remove('correct', 'wrong');
+                if (isEliminated && answerIndex < maxButtons) {
+                    btn.classList.add('wrong');
+                }
+            });
+            
+            // Update open question score buttons
+            allScoreButtons.forEach(btn => {
+                btn.disabled = !hasQuestion || isCorrectlyAnswered;
+            });
+            
+            btnHide.disabled = !isShowing && !isRevealed && !isCorrectlyAnswered;
+            btnShow.disabled = !isHidden;
+            btnReveal.disabled = !isShowing || isCorrectlyAnswered;
+            btnNext.disabled = false;
+            
+            if (!questionRep.value || !questionRep.value.text) {
+                statusBar.textContent = 'No question active';
+                statusBar.className = 'status-bar no-question';
+            } else if (questionRep.value.state === 'hidden') {
+                statusBar.textContent = 'Question hidden';
+                statusBar.className = 'status-bar no-question';
+            } else if (questionRep.value.state === 'revealed') {
+                statusBar.textContent = 'Answer revealed';
+                statusBar.className = 'status-bar answered';
+            } else if (isOpen) {
+                statusBar.textContent = 'Waiting for verbal answer...';
+                statusBar.className = 'status-bar ready';
+            } else if (eliminatedAnswers.length > 0) {
+                statusBar.textContent = `${eliminatedAnswers.length} wrong - pick again!`;
+                statusBar.className = 'status-bar answered';
+            } else {
+                statusBar.textContent = 'Ready for answers!';
+                statusBar.className = 'status-bar ready';
+            }
+        }
+        
+        function hideResults() {
+            team1Result.classList.remove('show', 'correct', 'wrong');
+            team2Result.classList.remove('show', 'correct', 'wrong');
+        }
+        
+        scoresRep.on('change', (newVal) => {
+            if (!newVal) return;
+            team1Title.textContent = newVal.team1.name || 'Team 1';
+            team2Title.textContent = newVal.team2.name || 'Team 2';
+            team1Score.textContent = newVal.team1.score || 0;
+            team2Score.textContent = newVal.team2.score || 0;
+            
+            // Apply dynamic team colors
+            const team1Color = newVal.team1.color || '#00d9ff';
+            const team2Color = newVal.team2.color || '#ff6b6b';
+            document.documentElement.style.setProperty('--team1-color', team1Color);
+            document.documentElement.style.setProperty('--team2-color', team2Color);
+        });
+        
+        // Helper to update UI based on selected question (without loading it to replicant)
+        function updateUIForSelectedQuestion(index) {
+            if (index < 0 || index >= questions.length) {
+                currentQuestionType = 'multipleChoice';
+                currentPhase = 1;
+                currentAnswer = '';
+                cluesPreview.style.display = 'none';
+                summaryPreview.style.display = 'none';
+                team1ExpectedAnswer.textContent = '-';
+                team2ExpectedAnswer.textContent = '-';
+                phaseIndicator.textContent = phaseLabels[1];
+                phaseIndicator.className = 'phase-indicator phase-1';
+                return;
+            }
+            
+            const q = questions[index];
+            currentQuestionType = q.type || 'multipleChoice';
+            currentPhase = q.phase || 1;
+            currentAnswer = q.answer || '';
+            
+            // Update phase indicator
+            phaseIndicator.textContent = phaseLabels[currentPhase] || `Phase ${currentPhase}`;
+            phaseIndicator.className = `phase-indicator phase-${currentPhase}`;
+            
+            // Show/hide clues preview
+            if (q.type === 'threeWordsClue' && q.clues) {
+                cluesPreview.innerHTML = q.clues.map(c => `<span class="clue-tag">${c}</span>`).join('');
+                cluesPreview.style.display = 'flex';
+            } else {
+                cluesPreview.style.display = 'none';
+            }
+            
+            // Show/hide summary preview
+            if (q.type === 'funnySummary' && q.summary) {
+                summaryPreview.textContent = `"${q.summary}"`;
+                summaryPreview.style.display = 'block';
+            } else {
+                summaryPreview.style.display = 'none';
+            }
+            
+            // Update expected answer for open questions
+            if (isOpenQuestionType(q.type) && q.answer) {
+                team1ExpectedAnswer.textContent = q.answer;
+                team2ExpectedAnswer.textContent = q.answer;
+            } else {
+                team1ExpectedAnswer.textContent = '-';
+                team2ExpectedAnswer.textContent = '-';
+            }
+        }
+        
+        // Question navigation
+        questionSelect.addEventListener('change', () => {
+            const index = parseInt(questionSelect.value);
+            currentIndex = index;
+            updatePreview(index);
+            updateUIForSelectedQuestion(index);
+            updateButtonStates();
+        });
+        
+        document.getElementById('prevQuestion').addEventListener('click', async () => {
+            if (currentIndex > 0) {
+                currentIndex--;
+                questionSelect.value = currentIndex;
+                updatePreview(currentIndex);
+                updateUIForSelectedQuestion(currentIndex);
+                updateButtonStates();
+            }
+        });
+        
+        document.getElementById('nextQuestion').addEventListener('click', async () => {
+            if (currentIndex < questions.length - 1) {
+                currentIndex++;
+                questionSelect.value = currentIndex;
+                updatePreview(currentIndex);
+                updateUIForSelectedQuestion(currentIndex);
+                updateButtonStates();
+            }
+        });
+        
+        // Answer buttons
+        allButtons.forEach(btn => {
+            btn.addEventListener('click', async () => {
+                if (btn.disabled) return;
+                
+                const team = btn.dataset.team;
+                const answer = parseInt(btn.dataset.answer);
+                const answerLetter = String.fromCharCode(65 + answer);
+                
+                try {
+                    const response = await fetch(`/quiz-overlay/api/${team}/answer/${answerLetter.toLowerCase()}`, {
+                        method: 'POST'
+                    });
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        btn.classList.add(data.correct ? 'correct' : 'wrong');
+                        
+                        const resultEl = team === 'team1' ? team1Result : team2Result;
+                        let resultText;
+                        if (data.correct) {
+                            isCorrectlyAnswered = true;
+                            resultText = `✓ Correct! +1 point`;
+                        } else {
+                            eliminatedAnswers = data.eliminatedAnswers || [];
+                            if (revealToggle.checked) {
+                                resultText = `✗ Wrong! Answer was ${data.correctAnswer}`;
+                            } else {
+                                resultText = `✗ Wrong! Try again!`;
+                            }
+                        }
+                        resultEl.textContent = resultText;
+                        resultEl.className = `result show ${data.correct ? 'correct' : 'wrong'}`;
+                        
+                        updateButtonStates();
+                    }
+                } catch (error) {
+                    console.error('Failed to submit answer:', error);
+                }
+            });
+        });
+        
+        // Open question score buttons (for phases 2 & 3)
+        allScoreButtons.forEach(btn => {
+            btn.addEventListener('click', async () => {
+                if (btn.disabled) return;
+                
+                const team = btn.dataset.team;
+                const action = btn.dataset.action;
+                const isCorrect = action === 'correct';
+                
+                try {
+                    if (isCorrect) {
+                        // Add point to team
+                        await fetch(`/quiz-overlay/api/score/${team}/add`, { method: 'POST' });
+                        // Reveal answer when correct
+                        isCorrectlyAnswered = true;
+                        await fetch('/quiz-overlay/api/question/reveal', { method: 'POST' });
+                    } else {
+                        // Mark team as having answered wrong (shows feedback on overlay)
+                        await fetch(`/quiz-overlay/api/question/openWrong/${team}`, { method: 'POST' });
+                        
+                        // Only reveal if revealOnWrong is enabled
+                        if (revealToggle.checked) {
+                            isCorrectlyAnswered = true;
+                            await fetch('/quiz-overlay/api/question/reveal', { method: 'POST' });
+                        }
+                        // If revealOnWrong is OFF, don't reveal - other team can still try
+                    }
+                    
+                    // Show result
+                    const resultEl = team === 'team1' ? team1Result : team2Result;
+                    if (isCorrect) {
+                        resultEl.textContent = `✓ Bonne réponse! +1 point`;
+                        resultEl.className = 'result show correct';
+                    } else {
+                        if (revealToggle.checked) {
+                            resultEl.textContent = `✗ Mauvaise réponse - Réponse: ${currentAnswer}`;
+                        } else {
+                            resultEl.textContent = `✗ Mauvaise réponse - Continuez!`;
+                        }
+                        resultEl.className = 'result show wrong';
+                        
+                        // Clear the wrong feedback after 2 seconds so teams can keep trying
+                        if (!revealToggle.checked) {
+                            setTimeout(async () => {
+                                // Clear the openWrongTeam to hide feedback on overlay
+                                await fetch(`/quiz-overlay/api/question/clearWrong`, { method: 'POST' });
+                            }, 2000);
+                        }
+                    }
+                    
+                    updateButtonStates();
+                } catch (error) {
+                    console.error('Failed to process open answer:', error);
+                }
+            });
+        });
+        
+        // Control buttons
+        btnHide.addEventListener('click', async () => {
+            try {
+                await fetch('/quiz-overlay/api/question/hide', { method: 'POST' });
+            } catch (error) {
+                console.error('Failed to hide question:', error);
+            }
+        });
+        
+        btnShow.addEventListener('click', async () => {
+            // If a question is selected, show that specific question
+            if (currentIndex >= 0) {
+                try {
+                    isCorrectlyAnswered = false;
+                    eliminatedAnswers = [];
+                    hideResults();
+                    await fetch(`/quiz-overlay/api/question/show/${currentIndex}`, { method: 'POST' });
+                    questionCounter.textContent = `Question ${currentIndex + 1} of ${questions.length}`;
+                } catch (error) {
+                    console.error('Failed to show question:', error);
+                }
+            } else {
+                // Just restore visibility of current question
+                try {
+                    await fetch('/quiz-overlay/api/question/show', { method: 'POST' });
+                } catch (error) {
+                    console.error('Failed to show question:', error);
+                }
+            }
+        });
+        
+        btnReveal.addEventListener('click', async () => {
+            try {
+                await fetch('/quiz-overlay/api/question/reveal', { method: 'POST' });
+            } catch (error) {
+                console.error('Failed to reveal answer:', error);
+            }
+        });
+        
+        btnNext.addEventListener('click', async () => {
+            try {
+                isCorrectlyAnswered = false;
+                eliminatedAnswers = [];
+                hideResults();
+                const response = await fetch('/quiz-overlay/api/question/next', { method: 'POST' });
+                const data = await response.json();
+                if (data.success) {
+                    currentIndex = data.question - 1;
+                    questionSelect.value = currentIndex;
+                    updatePreview(currentIndex);
+                    questionCounter.textContent = `Question ${currentIndex + 1} of ${questions.length}`;
+                }
+            } catch (error) {
+                console.error('Failed to go to next question:', error);
+            }
+        });
+        
+        // ========================================
+        // File Selector Handlers
+        // ========================================
+        
+        // Populate file selector
+        function populateFileSelect(files, currentFile) {
+            fileSelect.innerHTML = '<option value="">-- Select a file --</option>';
+            files.forEach(f => {
+                const option = document.createElement('option');
+                option.value = f.name;
+                option.textContent = f.isDefault ? `${f.name} (default)` : f.name;
+                if (f.name === currentFile) {
+                    option.selected = true;
+                }
+                fileSelect.appendChild(option);
+            });
+            
+            currentFileDisplay.textContent = currentFile ? `Loaded: ${currentFile}` : 'No file loaded';
+        }
+        
+        // Listen for file list changes
+        questionFilesRep.on('change', (newVal) => {
+            if (!newVal) return;
+            populateFileSelect(newVal.files, newVal.currentFile);
+        });
+        
+        // Load file button
+        btnLoadFile.addEventListener('click', async () => {
+            const filename = fileSelect.value;
+            if (!filename) {
+                alert('Please select a file first');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/quiz-overlay/api/files/load/${encodeURIComponent(filename)}`, { 
+                    method: 'POST' 
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    currentIndex = 0;
+                    questionSelect.value = 0;
+                    isCorrectlyAnswered = false;
+                    eliminatedAnswers = [];
+                    hideResults();
+                    currentFileDisplay.textContent = `Loaded: ${filename} (${data.questionsCount} questions)`;
+                } else {
+                    alert('Failed to load file: ' + (data.error || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Failed to load file:', error);
+                alert('Failed to load file');
+            }
+        });
+        
+        // Refresh files button
+        btnRefreshFiles.addEventListener('click', async () => {
+            try {
+                await fetch('/quiz-overlay/api/files/refresh', { method: 'POST' });
+            } catch (error) {
+                console.error('Failed to refresh files:', error);
+            }
+        });
+    </script>
+</body>
+</html>

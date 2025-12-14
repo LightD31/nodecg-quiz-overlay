@@ -1,0 +1,363 @@
+{
+  "questions": [
+    {
+      "phase": 1,
+      "type": "multipleChoice",
+      "text": "En quelle année le film The Mask est-il sorti au cinéma?",
+      "propositions": ["1989", "1994", "2000", "1997"],
+      "correctAnswer": 1
+    },
+    {
+      "phase": 1,
+      "type": "multipleChoice",
+      "text": "À quel groupe du Maurice associe-t-on le film La Cité de la peur?",
+      "propositions": ["Les Nuls", "Les Charlots", "Les Robins des Bois", "Les Inconnus"],
+      "correctAnswer": 0
+    },
+    {
+      "phase": 1,
+      "type": "multipleChoice",
+      "text": "Quel film américain raconte l'histoire d'un enterrement de vie de garçon qui tourne mal?",
+      "propositions": ["Project X", "American Pie", "Very Bad Trip", "Hangover"],
+      "correctAnswer": 2
+    },
+    {
+      "phase": 1,
+      "type": "multipleChoice",
+      "text": "Quel acteur incarne le docteur John Doolittle dans le film de 2020 le voyage du docteur Dolittle?",
+      "propositions": ["Brad Pitt", "Leonardo DiCaprio", "Robert Downey Jr.", "Johnny Depp"],
+      "correctAnswer": 2
+    },
+    {
+      "phase": 1,
+      "type": "multipleChoice",
+      "text": "Quelle actrice incarne Bridget Jones au cinéma?",
+      "propositions": ["Julia Roberts", "Kate Winslet", "Sandra Bullock", "Renée Zellweger"],
+      "correctAnswer": 3
+    },
+    {
+      "phase": 1,
+      "type": "multipleChoice",
+      "text": "Dans quel film d'anticipation des humains mutants sont capables de prédire les crimes qui vont avoir lieu?",
+      "propositions": ["Divergente", "Les Fils de l'homme", "Minority Report", "X-Men"],
+      "correctAnswer": 2
+    },
+    {
+      "phase": 1,
+      "type": "multipleChoice",
+      "text": "Quel animal se nomme Peau dans l'univers des dessins animés DreamWorks?",
+      "propositions": ["Un lapin", "Un chat", "Un chien", "Un écureuil"],
+      "correctAnswer": 3
+    },
+    {
+      "phase": 1,
+      "type": "multipleChoice",
+      "text": "Lequel de ces films d'animation Disney est le plus récent?",
+      "propositions": ["Zootopie", "Moana", "La Reine des Neiges II", "Raya et le Dernier Dragon"],
+      "correctAnswer": 3
+    },
+    {
+      "phase": 1,
+      "type": "multipleChoice",
+      "text": "Quel acteur incarne Superman dans 'Man of Steel'?",
+      "propositions": ["Robert Pattinson", "Henry Cavill", "Christian Bale", "Ben Affleck"],
+      "correctAnswer": 1
+    },
+    {
+      "phase": 1,
+      "type": "multipleChoice",
+      "text": "Qui a réalisé le film 'King Kong' sorti en 2005?",
+      "propositions": ["Martin Scorsese", "James Cameron", "Steven Spielberg", "Peter Jackson"],
+      "correctAnswer": 3
+    },
+    {
+      "phase": 1,
+      "type": "multipleChoice",
+      "text": "Quel est le nom du personnage principal dans la saga 'Star Wars'?",
+      "propositions": ["Obi-Wan Kenobi", "Darth Vader", "Han Solo", "Luke Skywalker"],
+      "correctAnswer": 3
+    },
+    {
+      "phase": 1,
+      "type": "multipleChoice",
+      "text": "Qui joue l'héroïne dans 'Les Hunger Games'?",
+      "propositions": ["Natalie Portman", "Jennifer Lawrence", "Emma Watson", "Scarlett Johansson"],
+      "correctAnswer": 1
+    },
+    {
+      "phase": 1,
+      "type": "multipleChoice",
+      "text": "À quelle espèce appartient Gismo dans 'Gremlins'?",
+      "propositions": ["Singe", "Elfe", "Alien", "Gremlin"],
+      "correctAnswer": 3
+    },
+    {
+      "phase": 1,
+      "type": "multipleChoice",
+      "text": "Quel acteur est célèbre pour son rôle de Tony Stark dans l'univers Marvel?",
+      "propositions": ["Mark Ruffalo", "Chris Evans", "Robert Downey Jr.", "Chris Hemsworth"],
+      "correctAnswer": 2
+    },
+    {
+      "phase": 1,
+      "type": "multipleChoice",
+      "text": "Quel film a été réalisé par Quentin Tarantino en 1994?",
+      "propositions": ["Kill Bill", "Pulp Fiction", "Reservoir Dogs", "Django Unchained"],
+      "correctAnswer": 1
+    },
+    {
+      "phase": 1,
+      "type": "multipleChoice",
+      "text": "Quel est le prénom du réalisateur français Truffaut?",
+      "propositions": ["Jean-Luc", "Claude", "François", "Alain"],
+      "correctAnswer": 2
+    },
+    {
+      "phase": 1,
+      "type": "multipleChoice",
+      "text": "Quel réalisateur est connu pour ses films en noir et blanc muet?",
+      "propositions": ["Quentin Tarantino", "Steven Spielberg", "Charlie Chaplin", "Martin Scorsese"],
+      "correctAnswer": 2
+    },
+    {
+      "phase": 1,
+      "type": "multipleChoice",
+      "text": "Dans quel film de Spielberg trouve-t-on un extraterrestre ami avec un garçon nommé Elliot?",
+      "propositions": ["Indiana Jones et la Dernière Croisade", "E.T. l'extra-terrestre", "Jurassic Park", "Les Dents de la mer"],
+      "correctAnswer": 1
+    },
+    {
+      "phase": 1,
+      "type": "multipleChoice",
+      "text": "Dans quelle saga peut-on rencontrer le personnage de Darth Vader?",
+      "propositions": ["Indiana Jones", "Le Seigneur des Anneaux", "Harry Potter", "Star Wars"],
+      "correctAnswer": 3
+    },
+    {
+      "phase": 1,
+      "type": "multipleChoice",
+      "text": "Quel est le nom de la méchante dans le film 'La Reine des Neiges'?",
+      "propositions": ["Elsa", "Ursula", "Anna", "Maléfique"],
+      "correctAnswer": 0
+    },
+    {
+      "phase": 1,
+      "type": "multipleChoice",
+      "text": "Dans quel dessin animé apparaît le méchant Jafar?",
+      "propositions": ["Le Roi Lion", "Aladdin", "Mulan", "Cendrillon"],
+      "correctAnswer": 1
+    },
+    {
+      "phase": 1,
+      "type": "multipleChoice",
+      "text": "Quel est le nom du petit dragon qui accompagne Mulan?",
+      "propositions": ["Poushou", "Chouchou", "Mouchou", "Froufrou"],
+      "correctAnswer": 2
+    },
+    {
+      "phase": 1,
+      "type": "multipleChoice",
+      "text": "Quel animal représente Dingo dans l'univers Disney?",
+      "propositions": ["Un lapin", "Un ours", "Un chat", "Un chien dalmatien"],
+      "correctAnswer": 3
+    },
+    {
+      "phase": 1,
+      "type": "multipleChoice",
+      "text": "Quels sont les deux acolytes de Cruella dans 'Les 101 Dalmatiens'?",
+      "propositions": ["Jasper et Horace", "Jasper et Jasperine", "Horace et Horacette", "Jasper et Jasperine"],
+      "correctAnswer": 0
+    },
+
+    {
+      "phase": 2,
+      "type": "threeWordsClue",
+      "text": "3 mots pour un film",
+      "clues": ["Sabre", "Padawan", "Étoiles"],
+      "answer": "Star Wars"
+    },
+    {
+      "phase": 2,
+      "type": "threeWordsClue",
+      "text": "3 mots pour un film",
+      "clues": ["Nain", "Photomaton", "Café"],
+      "answer": "Le fabuleux destin d'Amélie Poulain"
+    },
+    {
+      "phase": 2,
+      "type": "threeWordsClue",
+      "text": "3 mots pour un film",
+      "clues": ["Fast-food", "Pétales de roses", "Crise de la quarantaine"],
+      "answer": "American Beauty"
+    },
+    {
+      "phase": 2,
+      "type": "threeWordsClue",
+      "text": "3 mots pour un film",
+      "clues": ["Robot", "Futur", "Skynet"],
+      "answer": "Terminator"
+    },
+    {
+      "phase": 2,
+      "type": "threeWordsClue",
+      "text": "3 mots pour un film",
+      "clues": ["Médecin", "Train", "Cavale"],
+      "answer": "Le fugitif"
+    },
+    {
+      "phase": 2,
+      "type": "threeWordsClue",
+      "text": "3 mots pour un film",
+      "clues": ["Plutonium", "Horloge", "Libyens"],
+      "answer": "Retour vers le futur"
+    },
+    {
+      "phase": 2,
+      "type": "threeWordsClue",
+      "text": "3 mots pour un film",
+      "clues": ["Divorce", "Extraterrestre", "Invasion"],
+      "answer": "Independance Day"
+    },
+    {
+      "phase": 2,
+      "type": "threeWordsClue",
+      "text": "3 mots pour un film",
+      "clues": ["Océan", "Records", "Spaghetti"],
+      "answer": "Le grand bleu"
+    },
+    {
+      "phase": 2,
+      "type": "threeWordsClue",
+      "text": "3 mots pour un film",
+      "clues": ["Actrice", "Librairie", "Amour"],
+      "answer": "Coup de foudre à Notting Hill"
+    },
+    {
+      "phase": 2,
+      "type": "threeWordsClue",
+      "text": "3 mots pour un film",
+      "clues": ["Pénitencier", "Colosse", "Don"],
+      "answer": "La ligne verte"
+    },
+    {
+      "phase": 2,
+      "type": "threeWordsClue",
+      "text": "3 mots pour un film",
+      "clues": ["Arcachon", "Tong", "Pastis"],
+      "answer": "Camping"
+    },
+    {
+      "phase": 2,
+      "type": "threeWordsClue",
+      "text": "3 mots pour un film",
+      "clues": ["Diner", "Maquette", "Allumettes"],
+      "answer": "Le Diner de con"
+    },
+    {
+      "phase": 2,
+      "type": "threeWordsClue",
+      "text": "3 mots pour un film",
+      "clues": ["Barman", "Étudiant", "New York"],
+      "answer": "Cocktail"
+    },
+
+    {
+      "phase": 3,
+      "type": "funnySummary",
+      "text": "Résumé foireux",
+      "summary": "C'est un mec qui crée un club de combat avec … lui-même",
+      "answer": "Fight Club"
+    },
+    {
+      "phase": 3,
+      "type": "funnySummary",
+      "text": "Résumé foireux",
+      "summary": "Ce sont des gens qui n'ont pas vu la trilogie d'origine et qui refont la même erreur en construisant un nouveau parc",
+      "answer": "Jurassic World"
+    },
+    {
+      "phase": 3,
+      "type": "funnySummary",
+      "text": "Résumé foireux",
+      "summary": "C'est un mec qui voyage à bord d'une voiture, qui rencontre une fille qui est en fait sa mère et qui tombe amoureuse de lui",
+      "answer": "Retour vers le futur"
+    },
+    {
+      "phase": 3,
+      "type": "funnySummary",
+      "text": "Résumé foireux",
+      "summary": "C'est un film où tout le monde se retrouve sous la pluie parce qu'un des gars a envie de faire pipi",
+      "answer": "Inception"
+    },
+    {
+      "phase": 3,
+      "type": "funnySummary",
+      "text": "Résumé foireux",
+      "summary": "C'est l'histoire d'un gamin qui aurait dû changer d'école dès la première année, vu qu'il manque de mourir chaque année scolaire",
+      "answer": "Harry Potter"
+    },
+    {
+      "phase": 3,
+      "type": "funnySummary",
+      "text": "Résumé foireux",
+      "summary": "C'est l'histoire d'un mec il a de l'asthme, il a un fils qui est en kiffe sur sa sœur et ils se battent avec des néons",
+      "answer": "Star Wars"
+    },
+    {
+      "phase": 3,
+      "type": "funnySummary",
+      "text": "Résumé foireux",
+      "summary": "Un père emmène sa famille dans un hôtel à la montagne et il est de mauvaise humeur",
+      "answer": "Shining"
+    },
+    {
+      "phase": 3,
+      "type": "funnySummary",
+      "text": "Résumé foireux",
+      "summary": "C'est l'histoire d'un gars qui meurt parce qu'il a gagné aux cartes",
+      "answer": "Titanic"
+    },
+    {
+      "phase": 3,
+      "type": "funnySummary",
+      "text": "Résumé foireux",
+      "summary": "C'est l'histoire d'un gars qui court beaucoup et qui reçoit des messages qui explosent",
+      "answer": "Mission Impossible"
+    },
+    {
+      "phase": 3,
+      "type": "funnySummary",
+      "text": "Résumé foireux",
+      "summary": "Une princesse épouse un homme dont la profession est de pêcher toute sa famille et ses amis",
+      "answer": "La Petite sirène"
+    },
+    {
+      "phase": 3,
+      "type": "funnySummary",
+      "text": "Résumé foireux",
+      "summary": "Une jeune femme se repose enfin, mais un homme arrive pour ruiner son repos",
+      "answer": "La Belle au bois dormant"
+    },
+    {
+      "phase": 3,
+      "type": "funnySummary",
+      "text": "Résumé foireux",
+      "summary": "Un tueur en série élimine la femme du héros et un autre séquestre son fils handicapé. Le héros va à sa recherche, accompagné d'une femme qui a des troubles psychologiques",
+      "answer": "Le Monde de Némo"
+    },
+    {
+      "phase": 3,
+      "type": "funnySummary",
+      "text": "Résumé foireux",
+      "summary": "C'est une femme capricieuse qui veut un grand T3 exposé plein centre, sur mesure en un temps records",
+      "answer": "Astérix, Mission Cléopâtre"
+    },
+    {
+      "phase": 3,
+      "type": "funnySummary",
+      "text": "Résumé foireux",
+      "summary": "Une végane qui se rend compte que la viande, finalement, c'est pas si mal",
+      "answer": "Grave"
+    }
+  ]
+}
