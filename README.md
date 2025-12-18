@@ -101,13 +101,40 @@ The JSON file should contain a single object with a `questions` key, which is an
 
 The bundle exposes an HTTP API at `/quiz-overlay/api/` for advanced control. This allows for integration with external software like Bitfocus Companion.
 
-Key endpoints include:
-*   `/api/status`: Get the current state of the quiz.
-*   `/api/question/next`: Move to the next question.
-*   `/api/question/reveal`: Reveal the current answer.
-*   `/api/score/team1/add`: Add a point to Team 1.
+### Endpoints
 
-Refer to `extension/index.js` for a full list of available endpoints.
+#### Status & Files
+*   `GET /api/status`: Get the current state of the quiz.
+*   `GET /api/files`: Get list of available question files.
+*   `POST /api/files/load/:filename`: Load a specific question file.
+*   `POST /api/files/refresh`: Refresh the file list.
+
+#### Question Navigation & Control
+*   `POST /api/question/next`: Move to the next question.
+*   `POST /api/question/previous`: Move to the previous question.
+*   `POST /api/question/show/:index`: Load and show a specific question by index (0-based).
+*   `POST /api/question/show`: Show the current question (if hidden).
+*   `POST /api/question/hide`: Hide the current question.
+*   `POST /api/question/reveal`: Reveal the current answer.
+
+#### Open Question Feedback
+*   `POST /api/question/openWrong/:team`: Mark a team (`team1` or `team2`) as having answered wrong on an open question.
+*   `POST /api/question/clearWrong`: Clear the wrong feedback for open questions.
+
+#### Score Management
+*   `POST /api/score/team1/add`: Add a point to Team 1.
+*   `POST /api/score/team1/sub`: Subtract a point from Team 1.
+*   `POST /api/score/team2/add`: Add a point to Team 2.
+*   `POST /api/score/team2/sub`: Subtract a point from Team 2.
+*   `POST /api/score/reset`: Reset both scores to 0.
+
+#### Direct Answering (Auto-scoring)
+Simulate a team pressing an answer button (A, B, C, or D). This handles scoring and elimination logic automatically.
+*   `POST /api/team1/answer/:option`: Team 1 answers. Replace `:option` with `a`, `b`, `c`, or `d`.
+*   `POST /api/team2/answer/:option`: Team 2 answers. Replace `:option` with `a`, `b`, `c`, or `d`.
+
+#### Settings
+*   `POST /api/settings/revealOnWrong?enabled=true`: Enable/disable revealing the correct answer when a wrong answer is selected.
 
 ## Assets
 
