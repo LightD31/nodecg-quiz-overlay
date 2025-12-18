@@ -39,6 +39,9 @@ module.exports = function (nodecg) {
             currentFile: ''
         }
     });
+
+    const logoUrlRep = nodecg.Replicant('logoUrl', { defaultValue: '' });
+    const backgroundColorRep = nodecg.Replicant('backgroundColor', { defaultValue: '#1a1a2e' });
     
     let currentQuestionIndex = -1;
     const questionsDir = path.join(__dirname, '..', 'questions');

@@ -918,12 +918,25 @@
         }
         
         // Question navigation
-        questionSelect.addEventListener('change', () => {
+        questionSelect.addEventListener('change', async () => {
             const index = parseInt(questionSelect.value);
             currentIndex = index;
             updatePreview(index);
             updateUIForSelectedQuestion(index);
             updateButtonStates();
+
+            // If a question is currently active (showing or revealed), switch to the new one immediately
+            if (index >= 0 && questionRep.value && (questionRep.value.state === 'showing' || questionRep.value.state === 'revealed')) {
+                try {
+                    isCorrectlyAnswered = false;
+                    eliminatedAnswers = [];
+                    hideResults();
+                    await fetch(`/quiz-overlay/api/question/show/${index}`, { method: 'POST' });
+                    questionCounter.textContent = `Question ${index + 1} of ${questions.length}`;
+                } catch (error) {
+                    console.error('Failed to auto-show question:', error);
+                }
+            }
         });
         
         document.getElementById('prevQuestion').addEventListener('click', async () => {

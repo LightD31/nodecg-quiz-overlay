@@ -101,24 +101,31 @@
 </head>
 <body>
     <div class="section">
-        <h3>Participant Display Image</h3>
-        
+        <h3>Placeholder Logo</h3>
+        <p class="info">This logo is shown in the question box when no question is active.</p>
+
         <div class="upload-info">
             Upload images via NodeCG's <strong>Assets</strong> tab (in the dashboard header), then select them here.
         </div>
         
-        <label>Select Image</label>
-        <select id="imageSelect">
-            <option value="">-- No image --</option>
+        <label>Select Logo</label>
+        <select id="logoSelect">
+            <option value="">-- No logo --</option>
         </select>
         
         <div style="margin-top: 15px;">
-            <button id="clearImage" class="btn btn-danger">Clear Image</button>
+            <button id="clearLogo" class="btn btn-danger">Clear Logo</button>
         </div>
         
-        <div class="preview" id="preview">
-            <div class="preview-placeholder">No image set</div>
+        <div class="preview" id="logoPreview">
+            <div class="preview-placeholder">No logo set</div>
         </div>
+    </div>
+
+    <div class="section">
+        <h3>Background Color</h3>
+        <p class="info">Changes the background color for both the overlay and participant screens.</p>
+        <input type="color" id="colorPicker" style="width: 100%; height: 40px; border: none; padding: 0; border-radius: 4px; cursor: pointer;">
     </div>
 
     <div class="section">
@@ -134,63 +141,70 @@
     </div>
 
     <script>
-        const settingsRep = nodecg.Replicant('displaySettings', {
-            defaultValue: { imageUrl: '' }
-        });
-        
+        // --- Replicants ---
+        const logoUrlRep = nodecg.Replicant('logoUrl', { defaultValue: '' });
         const assetsRep = nodecg.Replicant('assets:images');
+        const backgroundColorRep = nodecg.Replicant('backgroundColor', { defaultValue: '#1a1a2e' });
 
-        const imageSelect = document.getElementById('imageSelect');
-        const previewEl = document.getElementById('preview');
+        // --- Logo Elements ---
+        const logoSelect = document.getElementById('logoSelect');
+        const logoPreviewEl = document.getElementById('logoPreview');
+        const clearLogoBtn = document.getElementById('clearLogo');
 
-        // Populate dropdown with uploaded assets
-        assetsRep.on('change', (newVal) => {
-            if (!newVal) return;
-            
-            const currentValue = imageSelect.value;
-            imageSelect.innerHTML = '<option value="">-- No image --</option>';
-            
-            newVal.forEach(asset => {
+        // --- Background Color Elements ---
+        const colorPicker = document.getElementById('colorPicker');
+
+        // --- Generic Functions ---
+        function populateAssetDropdown(selectElement, assets, currentValue) {
+            selectElement.innerHTML = `<option value="">-- ${selectElement.id === 'logoSelect' ? 'No logo' : 'No image'} --</option>`;
+            assets.forEach(asset => {
                 const option = document.createElement('option');
                 option.value = asset.url;
                 option.textContent = asset.name;
-                imageSelect.appendChild(option);
+                selectElement.appendChild(option);
             });
-            
-            // Restore selection
             if (currentValue) {
-                imageSelect.value = currentValue;
-            } else if (settingsRep.value && settingsRep.value.imageUrl) {
-                imageSelect.value = settingsRep.value.imageUrl;
-            }
-        });
-
-        settingsRep.on('change', (newVal) => {
-            if (!newVal) return;
-            
-            imageSelect.value = newVal.imageUrl || '';
-            updatePreview(newVal.imageUrl);
-        });
-        
-        imageSelect.addEventListener('change', () => {
-            if (settingsRep.value) {
-                settingsRep.value.imageUrl = imageSelect.value;
-            }
-        });
-
-        function updatePreview(url) {
-            if (url) {
-                previewEl.innerHTML = `<img src="${url}" alt="Preview" onerror="this.parentElement.innerHTML='<div class=\\'preview-placeholder\\'>Failed to load image</div>'">`;
-            } else {
-                previewEl.innerHTML = '<div class="preview-placeholder">No image set</div>';
+                selectElement.value = currentValue;
             }
         }
 
-        document.getElementById('clearImage').addEventListener('click', () => {
-            if (settingsRep.value) {
-                settingsRep.value.imageUrl = '';
+        function updatePreview(element, url, placeholderText) {
+            if (url) {
+                element.innerHTML = `<img src="${url}" alt="Preview" onerror="this.parentElement.innerHTML='<div class=\\'preview-placeholder\\'>Failed to load image</div>'">`;
+            } else {
+                element.innerHTML = `<div class="preview-placeholder">${placeholderText}</div>`;
             }
-            imageSelect.value = '';
+        }
+
+        // --- Asset Population ---
+        assetsRep.on('change', (newVal) => {
+            if (!newVal) return;
+            populateAssetDropdown(logoSelect, newVal, logoSelect.value || logoUrlRep.value);
+        });
+
+        // --- Logo Logic ---
+        logoUrlRep.on('change', (newVal) => {
+            const url = newVal || '';
+            logoSelect.value = url;
+            updatePreview(logoPreviewEl, url, 'No logo set');
+        });
+
+        logoSelect.addEventListener('change', () => {
+            logoUrlRep.value = logoSelect.value;
+        });
+
+        clearLogoBtn.addEventListener('click', () => {
+            logoUrlRep.value = '';
+            logoSelect.value = '';
+        });
+
+        // --- Background Color Logic ---
+        backgroundColorRep.on('change', (newVal) => {
+            colorPicker.value = newVal || '#1a1a2e';
+        });
+
+        colorPicker.addEventListener('input', () => {
+            backgroundColorRep.value = colorPicker.value;
         });
     </script>
 </body>
