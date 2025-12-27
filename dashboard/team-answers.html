@@ -629,6 +629,8 @@
         let currentQuestionType = 'multipleChoice';
         let currentPhase = 1;
         let currentAnswer = '';
+        let currentQuestionHasPropositions = false;
+        let currentPropositionsCount = 0;
         
         // Answer letters for each question type
         const answerLetters = ['A', 'B', 'C', 'D'];
@@ -642,8 +644,12 @@
         };
         
         // Check if question type requires open answer (no A/B/C/D buttons)
-        function isOpenQuestionType(type) {
-            return type === 'threeWordsClue' || type === 'funnySummary';
+        function isOpenQuestionType(question) {
+            if (!question) return false;
+            const type = question.type || 'multipleChoice';
+            const isSpecial = type === 'threeWordsClue' || type === 'funnySummary';
+            const hasPropositions = question.propositions && question.propositions.length > 0;
+            return isSpecial && !hasPropositions;
         }
         
         // Sync the revealOnWrong toggle with the replicant
@@ -655,6 +661,8 @@
             currentQuestionType = newVal.type || 'multipleChoice';
             currentPhase = newVal.phase || 1;
             currentAnswer = newVal.answer || '';
+            currentQuestionHasPropositions = newVal.propositions && newVal.propositions.length > 0;
+            currentPropositionsCount = currentQuestionHasPropositions ? newVal.propositions.length : 0;
             
             // Sync toggle state with replicant
             if (newVal.revealOnWrong !== undefined) {
@@ -710,7 +718,7 @@
         }
         
         function updateQuestionPreviewUI(newVal) {
-            const isOpen = isOpenQuestionType(newVal.type);
+            const isOpen = isOpenQuestionType(newVal);
             
             // Show/hide clues preview
             if (newVal.type === 'threeWordsClue' && newVal.clues) {
@@ -774,8 +782,10 @@
             const isShowing = questionRep.value && questionRep.value.state === 'showing';
             const isRevealed = questionRep.value && questionRep.value.state === 'revealed';
             const isTrueFalse = currentQuestionType === 'trueFalse';
-            const isOpen = isOpenQuestionType(currentQuestionType);
-            const maxButtons = isTrueFalse ? 2 : 4;
+            const isSpecial = currentQuestionType === 'threeWordsClue' || currentQuestionType === 'funnySummary';
+            const isOpen = isSpecial && !currentQuestionHasPropositions;
+            
+            let maxButtons = isTrueFalse ? 2 : (currentQuestionHasPropositions ? currentPropositionsCount : 4);
             
             // Show/hide answer grids vs open question mode
             if (isOpen) {
@@ -873,6 +883,8 @@
                 currentQuestionType = 'multipleChoice';
                 currentPhase = 1;
                 currentAnswer = '';
+                currentQuestionHasPropositions = false;
+                currentPropositionsCount = 0;
                 cluesPreview.style.display = 'none';
                 summaryPreview.style.display = 'none';
                 team1ExpectedAnswer.textContent = '-';
@@ -886,6 +898,8 @@
             currentQuestionType = q.type || 'multipleChoice';
             currentPhase = q.phase || 1;
             currentAnswer = q.answer || '';
+            currentQuestionHasPropositions = q.propositions && q.propositions.length > 0;
+            currentPropositionsCount = currentQuestionHasPropositions ? q.propositions.length : 0;
             
             // Update phase indicator
             phaseIndicator.textContent = phaseLabels[currentPhase] || `Phase ${currentPhase}`;
@@ -908,7 +922,7 @@
             }
             
             // Update expected answer for open questions
-            if (isOpenQuestionType(q.type) && q.answer) {
+            if (isOpenQuestionType(q) && q.answer) {
                 team1ExpectedAnswer.textContent = q.answer;
                 team2ExpectedAnswer.textContent = q.answer;
             } else {

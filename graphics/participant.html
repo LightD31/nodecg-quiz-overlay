@@ -25,14 +25,15 @@
             align-items: center;
             justify-content: center;
             position: relative;
+            padding-bottom: 230px;
         }
         
         .container {
             position: relative;
             z-index: 1;
             width: 100%;
-            max-width: 1400px;
-            padding: 40px;
+            max-width: 1800px;
+            padding: 60px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -66,6 +67,7 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
+            transition: all 0.5s ease;
         }
 
         .question-card.logo-mode {
@@ -88,7 +90,8 @@
             margin-bottom: 50px;
             line-height: 1.4;
             text-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-        }
+            transition: all 0.5s ease;
+         }
         
         .propositions-grid {
             display: grid;
@@ -102,13 +105,28 @@
             margin: 0 auto;
         }
         
+        .propositions-grid.special-mode {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            margin-top: 40px;
+            width: 100%;
+            grid-template-columns: none;
+        }
+        
+        .propositions-grid.special-mode .proposition {
+            flex: 1;
+            justify-content: center;
+        }
+
         /* Three Words Clue Layout */
         .clues-container {
             display: flex;
             justify-content: center;
             align-items: center;
             gap: 40px;
-            flex-wrap: wrap;
+            flex-wrap: nowrap;
+            transition: all 0.5s ease;
         }
         
         .clue-word {
@@ -121,17 +139,21 @@
             color: #fff;
             text-shadow: 0 3px 15px rgba(0, 0, 0, 0.5);
             box-shadow: 0 15px 50px rgba(0, 217, 255, 0.35);
+            white-space: nowrap;
+            transition: all 0.5s ease;
         }
         
         .clue-separator {
             font-size: 56px;
             color: #00d9ff;
             font-weight: bold;
+            transition: all 0.5s ease;
         }
         
         /* Funny Summary Layout */
         .summary-container {
             text-align: center;
+            transition: all 0.5s ease;
         }
         
         .summary-text {
@@ -145,6 +167,7 @@
             border: 3px solid rgba(255, 165, 2, 0.5);
             border-radius: 25px;
             text-shadow: 0 3px 15px rgba(0, 0, 0, 0.5);
+            transition: all 0.5s ease;
         }
         
         /* Answer Display (for phases 2 & 3) */
@@ -171,6 +194,7 @@
             text-transform: uppercase;
             letter-spacing: 4px;
             margin-bottom: 15px;
+            transition: all 0.5s ease;
         }
         
         .answer-text {
@@ -178,6 +202,7 @@
             font-weight: 700;
             color: #00ff88;
             text-shadow: 0 0 40px rgba(0, 255, 136, 0.5);
+            transition: all 0.5s ease;
         }
         
         /* Wrong answer feedback for open questions */
@@ -212,12 +237,14 @@
             color: #ff6b6b;
             font-weight: 600;
             margin-bottom: 8px;
+            transition: all 0.5s ease;
         }
         
         .wrong-feedback-text {
             font-size: 32px;
             font-weight: 700;
             color: #ff4444;
+            transition: all 0.5s ease;
         }
 
         .proposition.hidden {
@@ -361,37 +388,59 @@
             z-index: 100;
             display: flex;
             justify-content: center;
-            gap: 60px;
-            padding: 20px 40px;
-            background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.4) 70%, transparent 100%);
+            gap: 100px;
+            padding: 40px 60px;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.6) 60%, transparent 100%);
         }
         
-        .score-team {
+        .score-pill {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            padding: 25px 80px;
+            border-radius: 80px;
             display: flex;
             align-items: center;
-            gap: 20px;
-            background: rgba(255, 255, 255, 0.08);
-            border: 2px solid rgba(0, 217, 255, 0.4);
-            border-radius: 20px;
-            padding: 15px 35px;
-            backdrop-filter: blur(10px);
-            min-width: 280px;
+            gap: 50px;
+            height: 150px;
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 1;
+            border: 3px solid rgba(255,255,255,0.1);
+            min-width: 500px;
         }
-        
-        .score-team-name {
-            font-size: 24px;
+
+        .score-pill.team-1 {
+            background: var(--team1-color, #00d9ff);
+            background-image: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(0,0,0,0) 100%);
+            box-shadow: 0 10px 40px var(--team1-shadow, rgba(0, 217, 255, 0.3));
+        }
+
+        .score-pill.team-2 {
+            background: var(--team2-color, #ff6b6b);
+            background-image: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(0,0,0,0) 100%);
+            box-shadow: 0 10px 40px var(--team2-shadow, rgba(255, 107, 107, 0.3));
+        }
+
+        .score-pill .team-name {
+            font-size: 56px;
             font-weight: 600;
             color: #fff;
-            flex: 1;
+            max-width: 500px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
         }
         
-        .score-team-points {
-            font-size: 36px;
+        .score-pill .team-points {
+            font-size: 96px;
             font-weight: 800;
-            color: #00d9ff;
-            text-shadow: 0 0 20px rgba(0, 217, 255, 0.5);
-            min-width: 60px;
-            text-align: right;
+            color: #fff;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            min-width: 120px;
+            text-align: center;
+            transition: all 0.3s ease;
         }
     </style>
 </head>
@@ -412,7 +461,21 @@
 
                 <div class="question-text" id="questionText">Question goes here?</div>
                 
-                <!-- Multiple Choice / True-False propositions -->
+                <!-- Three Words Clue (Phase 2) -->
+                <div class="clues-container" id="cluesContainer" style="display: none;">
+                    <div class="clue-word" id="clue0">Mot 1</div>
+                    <span class="clue-separator">•</span>
+                    <div class="clue-word" id="clue1">Mot 2</div>
+                    <span class="clue-separator">•</span>
+                    <div class="clue-word" id="clue2">Mot 3</div>
+                </div>
+                
+                <!-- Funny Summary (Phase 3) -->
+                <div class="summary-container" id="summaryContainer" style="display: none;">
+                    <div class="summary-text" id="summaryText">"Un résumé foireux..."</div>
+                </div>
+                
+                <!-- Propositions Grid (Used for all types) -->
                 <div class="propositions-grid" id="propositionsGrid">
                     <div class="proposition" id="prop0">
                         <span class="prop-letter">A</span>
@@ -430,20 +493,6 @@
                         <span class="prop-letter">D</span>
                         <span class="prop-text" id="propText3">Answer D</span>
                     </div>
-                </div>
-                
-                <!-- Three Words Clue (Phase 2) -->
-                <div class="clues-container" id="cluesContainer" style="display: none;">
-                    <div class="clue-word" id="clue0">Mot 1</div>
-                    <span class="clue-separator">•</span>
-                    <div class="clue-word" id="clue1">Mot 2</div>
-                    <span class="clue-separator">•</span>
-                    <div class="clue-word" id="clue2">Mot 3</div>
-                </div>
-                
-                <!-- Funny Summary (Phase 3) -->
-                <div class="summary-container" id="summaryContainer" style="display: none;">
-                    <div class="summary-text" id="summaryText">"Un résumé foireux..."</div>
                 </div>
                 
                 <!-- Answer Display (for phases 2 & 3) -->
@@ -465,13 +514,13 @@
     
     <!-- Scoreboard -->
     <div class="scoreboard" id="scoreboard">
-        <div class="score-team">
-            <span class="score-team-name" id="team1Name">Équipe 1</span>
-            <span class="score-team-points" id="team1Score">0</span>
+        <div class="score-pill team-1">
+            <span class="team-name" id="team1Name">Équipe 1</span>
+            <span class="team-points" id="team1Score">0</span>
         </div>
-        <div class="score-team">
-            <span class="score-team-name" id="team2Name">Équipe 2</span>
-            <span class="score-team-points" id="team2Score">0</span>
+        <div class="score-pill team-2">
+            <span class="team-points" id="team2Score">0</span>
+            <span class="team-name" id="team2Name">Équipe 2</span>
         </div>
     </div>
 
@@ -526,6 +575,17 @@
             document.body.style.backgroundColor = newVal;
         });
 
+        function hexToRgba(hex, alpha) {
+            hex = hex.replace('#', '');
+            if (hex.length === 3) {
+                hex = hex.split('').map(c => c + c).join('');
+            }
+            const r = parseInt(hex.substring(0, 2), 16);
+            const g = parseInt(hex.substring(2, 4), 16);
+            const b = parseInt(hex.substring(4, 6), 16);
+            return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+        }
+
         function updateVisibility() {
             const question = questionRep.value;
             const logoUrl = logoUrlRep.value;
@@ -559,20 +619,19 @@
             if (newVal.team1) {
                 team1Name.textContent = newVal.team1.name || 'Équipe 1';
                 team1Score.textContent = newVal.team1.score || 0;
-                const color1 = newVal.team1.color || '#00d9ff';
-                team1Score.style.color = color1;
-                team1Score.style.textShadow = `0 0 20px ${color1}80`;
-                team1Name.parentElement.style.borderColor = `${color1}66`;
             }
             
             if (newVal.team2) {
                 team2Name.textContent = newVal.team2.name || 'Équipe 2';
                 team2Score.textContent = newVal.team2.score || 0;
-                const color2 = newVal.team2.color || '#ff6b6b';
-                team2Score.style.color = color2;
-                team2Score.style.textShadow = `0 0 20px ${color2}80`;
-                team2Name.parentElement.style.borderColor = `${color2}66`;
             }
+
+            const team1Color = newVal.team1?.color || '#00d9ff';
+            const team2Color = newVal.team2?.color || '#ff6b6b';
+            document.documentElement.style.setProperty('--team1-color', team1Color);
+            document.documentElement.style.setProperty('--team2-color', team2Color);
+            document.documentElement.style.setProperty('--team1-shadow', hexToRgba(team1Color, 0.3));
+            document.documentElement.style.setProperty('--team2-shadow', hexToRgba(team2Color, 0.3));
         });
         
         let wrongAnimationTimeout = null;
@@ -587,19 +646,26 @@
             const isThreeWords = questionType === 'threeWordsClue';
             const isFunnySummary = questionType === 'funnySummary';
             const isTrueFalse = questionType === 'trueFalse';
-            const propCount = isTrueFalse ? 2 : 4;
+            
+            const hasPropositions = newVal.propositions && newVal.propositions.length > 0;
             
             // Show/hide appropriate containers based on question type
-            propositionsGrid.style.display = isMultipleChoice ? 'grid' : 'none';
+            if (hasPropositions) {
+                propositionsGrid.style.display = ''; // Let CSS handle flex/grid
+                if (isThreeWords || isFunnySummary) {
+                    propositionsGrid.classList.add('special-mode');
+                    propositionsGrid.classList.remove('true-false');
+                } else {
+                    propositionsGrid.classList.remove('special-mode');
+                    propositionsGrid.classList.toggle('true-false', isTrueFalse);
+                }
+            } else {
+                propositionsGrid.style.display = 'none';
+            }
+
             cluesContainer.style.display = isThreeWords ? 'flex' : 'none';
             summaryContainer.style.display = isFunnySummary ? 'block' : 'none';
             
-            // Update grid layout for True/False
-            if (isTrueFalse) {
-                propositionsGrid.classList.add('true-false');
-            } else {
-                propositionsGrid.classList.remove('true-false');
-            }
             
             // Update question text
             questionText.textContent = newVal.text || 'Question goes here?';
@@ -619,7 +685,7 @@
             }
             
             // Show answer container only for phases 2 & 3 when revealed and there is an answer
-            if ((isThreeWords || isFunnySummary) && newVal.state === 'revealed' && newVal.answer) {
+            if ((isThreeWords || isFunnySummary) && newVal.state === 'revealed' && newVal.answer && !hasPropositions) {
                 answerContainer.classList.add('visible');
                 answerText.textContent = newVal.answer;
                 wrongFeedbackContainer.classList.remove('visible');
@@ -641,24 +707,35 @@
             }
             
             // Handle Multiple Choice propositions
-            if (isMultipleChoice && newVal.propositions) {
+            if (hasPropositions) {
+                let currentPropCount = 4;
+                if (isTrueFalse) {
+                    currentPropCount = 2;
+                } else if (isThreeWords || isFunnySummary) {
+                    currentPropCount = 3;
+                }
+
+                if (newVal.propositions) {
                 newVal.propositions.forEach((prop, i) => {
-                    if (i < propCount) {
-                        propTexts[i].textContent = prop || `Answer ${propLetters[i]}`;
-                        propElements[i].classList.remove('hidden');
+                        if (i < currentPropCount && propElements[i]) {
+                            if (propTexts[i]) propTexts[i].textContent = prop || `Answer ${propLetters[i]}`;
+                            propElements[i].classList.remove('hidden');
                     }
                 });
+                }
                 
                 // Hide unused propositions for True/False questions
-                for (let i = propCount; i < 4; i++) {
-                    propElements[i].classList.add('hidden');
+                for (let i = currentPropCount; i < propElements.length; i++) {
+                    if (propElements[i]) propElements[i].classList.add('hidden');
                 }
                 
                 // Handle correct answer reveal and wrong answer feedback
-                for (let i = 0; i < propCount; i++) {
+                for (let i = 0; i < currentPropCount; i++) {
                     const el = propElements[i];
-                    const isLastWrong = newVal.lastWrongAnswer === i;
-                    const isEliminated = newVal.eliminatedAnswers && newVal.eliminatedAnswers.includes(i);
+                    if (!el) continue;
+                    
+                    const isLastWrong = newVal.lastWrongAnswer == i;
+                    const isEliminated = newVal.eliminatedAnswers && newVal.eliminatedAnswers.some(a => a == i);
                     
                     if (isLastWrong && newVal.state === 'showing') {
                         el.classList.remove('correct', 'eliminated');
@@ -678,12 +755,12 @@
                             el.classList.add('eliminated');
                         }
                         
-                        if (newVal.state === 'showing' && newVal.showCorrectOnWrong && i === newVal.correctAnswer) {
+                        if (newVal.state === 'showing' && newVal.showCorrectOnWrong && i == newVal.correctAnswer) {
                             el.classList.add('correct');
                         }
                         
                         if (newVal.state === 'revealed') {
-                            if (i === newVal.correctAnswer) {
+                            if (i == newVal.correctAnswer) {
                                 el.classList.add('correct');
                             }
                             if (isEliminated) {

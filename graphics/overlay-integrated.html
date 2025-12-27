@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quiz Overlay</title>
+    <title>Quiz Overlay Integrated</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
         
@@ -22,59 +22,91 @@
             transition: background-color 0.3s ease;
         }
         
-
         .overlay-container {
             width: 100%;
             height: 100%;
             position: relative;
         }
         
-        /* Scoreboard */
-        .team-score {
+        /* Integrated Header */
+        .integrated-header {
             position: absolute;
+            top: -52px;
+            left: 0;
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            justify-items: center;
+            align-items: center;
+            z-index: 20;
+            width: 100%;
+            pointer-events: none;
+        }
+
+        .phase-badge {
+            background: linear-gradient(135deg, #ffa502 0%, #ff6b35 100%);
+            padding: 12px 40px;
+            border-radius: 30px;
+            font-size: 28px;
+            font-weight: 700;
+            color: #fff;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            box-shadow: 0 5px 20px rgba(255, 165, 2, 0.4);
+            white-space: nowrap;
+            position: relative;
+            z-index: 2;
+            transition: opacity 0.3s ease;
+        }
+
+        .phase-badge.hidden {
+            opacity: 0;
+        }
+
+        .score-pill {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 10px 50px;
+            border-radius: 50px;
             display: flex;
             align-items: center;
-            gap: 15px;
-            background: rgba(255, 255, 255, 0.08);
-            padding: 15px 30px;
-            border-radius: 20px;
-            backdrop-filter: blur(10px);
-            z-index: 10;
-            transition: left 0.3s ease, top 0.3s ease;
-            transform: translate(-50%, -50%);
+            gap: 20px;
+            height: 100px;
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 1;
+            border: 2px solid rgba(255,255,255,0.1);
         }
-        
-        .team-score.team-1 {
-            border: 3px solid var(--team1-color, #00d9ff);
+
+        .score-pill.team-1 {
+            background: var(--team1-color, #00d9ff);
+            background-image: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(0,0,0,0) 100%);
+            box-shadow: 0 5px 20px var(--team1-shadow, rgba(0, 217, 255, 0.3));
         }
-        
-        .team-score.team-2 {
-            border: 3px solid var(--team2-color, #ff6b6b);
+
+        .score-pill.team-2 {
+            background: var(--team2-color, #ff6b6b);
+            background-image: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(0,0,0,0) 100%);
+            box-shadow: 0 5px 20px var(--team2-shadow, rgba(255, 107, 107, 0.3));
         }
-        
-        .team-name {
+
+        .score-pill .team-name {
             font-size: 24px;
             font-weight: 600;
             color: #fff;
-            max-width: 200px;
+            max-width: 260px;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
         }
-        
-        .team-points {
-            font-size: 36px;
-            font-weight: 700;
-            min-width: 60px;
+
+        .score-pill .team-points {
+            font-size: 72px;
+            font-weight: 800;
+            color: #fff;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+            min-width: 80px;
             text-align: center;
-        }
-        
-        .team-1 .team-points {
-            color: var(--team1-color, #00d9ff);
-        }
-        
-        .team-2 .team-points {
-            color: var(--team2-color, #ff6b6b);
         }
         
         /* Question Card */
@@ -90,13 +122,14 @@
         
         .question-container.visible {
             opacity: 1;
+            animation: slideUp 0.5s ease-out;
         }
         
         .question-card {
             background: rgba(255, 255, 255, 0.05);
             border-radius: 30px;
             padding: 25px 30px;
-            padding-top: 35px;
+            padding-top: 40px;
             backdrop-filter: blur(20px);
             border: 3px solid rgba(0, 217, 255, 0.4);
             box-shadow: 
@@ -107,10 +140,12 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
+            position: relative;
+            transition: opacity 0.5s ease;
         }
         
         .question-text {
-            font-size: 32px;
+            font-size: 42px;
             font-weight: 600;
             color: #fff;
             text-align: center;
@@ -161,7 +196,7 @@
             border: 3px solid #00d9ff;
             border-radius: 20px;
             padding: 15px 30px;
-            font-size: 32px;
+            font-size: 36px;
             font-weight: 700;
             color: #fff;
             text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
@@ -170,7 +205,7 @@
         }
         
         .clue-separator {
-            font-size: 32px;
+            font-size: 36px;
             color: #00d9ff;
             font-weight: bold;
             transition: all 0.3s ease;
@@ -186,7 +221,7 @@
         }
         
         .summary-text {
-            font-size: 38px;
+            font-size: 46px;
             font-weight: 500;
             color: #fff;
             font-style: italic;
@@ -199,7 +234,7 @@
             transition: all 0.3s ease;
         }
         
-        /* Answer Display (for phases 2 & 3) */
+        /* Answer Display */
         .answer-container {
             text-align: center;
             margin-top: 0;
@@ -219,7 +254,7 @@
         }
         
         .answer-label {
-            font-size: 18px;
+            font-size: 24px;
             color: #00ff88;
             text-transform: uppercase;
             letter-spacing: 3px;
@@ -227,39 +262,18 @@
         }
         
         .answer-text {
-            font-size: 36px;
+            font-size: 48px;
             font-weight: 700;
             color: #00ff88;
             text-shadow: 0 0 30px rgba(0, 255, 136, 0.5);
             animation: pulse 1s ease-in-out infinite;
         }
         
-        /* Phase Badge */
-        .phase-badge {
-            position: absolute;
-            top: -18px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: linear-gradient(135deg, #ffa502 0%, #ff6b35 100%);
-            padding: 10px 30px;
-            border-radius: 20px;
-            font-size: 18px;
-            font-weight: 700;
-            color: #fff;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            box-shadow: 0 5px 20px rgba(255, 165, 2, 0.4);
-        }
-        
-        .question-card {
-            position: relative;
-        }
-
         .proposition.hidden {
             display: none;
         }
         
-        /* Wrong answer feedback for open questions */
+        /* Wrong answer feedback */
         .wrong-feedback-container {
             text-align: center;
             margin-top: 0;
@@ -288,14 +302,14 @@
         }
         
         .wrong-feedback-team {
-            font-size: 16px;
+            font-size: 20px;
             color: #ff6b6b;
             font-weight: 600;
             margin-bottom: 3px;
         }
         
         .wrong-feedback-text {
-            font-size: 22px;
+            font-size: 28px;
             font-weight: 700;
             color: #ff4444;
         }
@@ -315,6 +329,7 @@
             background: rgba(0, 255, 136, 0.2);
             border-color: #00ff88;
             box-shadow: 0 0 30px rgba(0, 255, 136, 0.3);
+            animation: pulse 1s ease-in-out infinite;
         }
         
         .proposition.correct .prop-letter {
@@ -326,6 +341,7 @@
             background: rgba(255, 68, 68, 0.3);
             border-color: #ff4444;
             box-shadow: 0 0 30px rgba(255, 68, 68, 0.4);
+            animation: shake 0.6s ease-in-out;
         }
         
         .proposition.wrong .prop-letter {
@@ -351,15 +367,15 @@
         }
         
         .prop-letter {
-            width: 40px;
-            height: 40px;
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
             background: rgba(0, 217, 255, 0.2);
             border: 2px solid #00d9ff;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
+            font-size: 28px;
             font-weight: 700;
             color: #00d9ff;
             flex-shrink: 0;
@@ -367,7 +383,7 @@
         }
         
         .prop-text {
-            font-size: 22px;
+            font-size: 30px;
             color: #fff;
             font-weight: 500;
             transition: font-size 0.3s ease;
@@ -375,7 +391,7 @@
         
         /* Dynamic sizing when answer is visible */
         .question-card.answer-visible .question-text {
-            font-size: 26px;
+            font-size: 32px;
             margin-bottom: 15px;
         }
         
@@ -386,11 +402,11 @@
         
         .question-card.answer-visible .clue-word {
             padding: 20px 35px;
-            font-size: 32px;
+            font-size: 40px;
         }
         
         .question-card.answer-visible .clue-separator {
-            font-size: 36px;
+            font-size: 44px;
         }
         
         .question-card.answer-visible .summary-container {
@@ -398,14 +414,14 @@
         }
         
         .question-card.answer-visible .summary-text {
-            font-size: 26px;
+            font-size: 34px;
             padding: 20px 35px;
             line-height: 1.4;
         }
 
         /* Styles for placeholder logo */
         #placeholderLogoContainer {
-            display: none; /* Hidden by default */
+            display: none;
             justify-content: center;
             align-items: center;
             width: 100%;
@@ -418,7 +434,6 @@
             object-fit: contain;
         }
 
-        /* When in logo mode, hide all direct children of question-card except the logo */
         .question-card.logo-mode > *:not(#placeholderLogoContainer) {
             display: none !important;
         }
@@ -438,14 +453,6 @@
             20%, 40%, 60%, 80% { transform: translateX(5px); }
         }
         
-        .proposition.correct {
-            animation: pulse 1s ease-in-out infinite;
-        }
-        
-        .proposition.wrong {
-            animation: shake 0.6s ease-in-out;
-        }
-        
         @keyframes slideUp {
             from {
                 opacity: 0;
@@ -456,35 +463,37 @@
                 transform: translateX(-50%) translateY(0);
             }
         }
-        
-        .question-container.visible {
-            animation: slideUp 0.5s ease-out;
+
+        .question-card.hidden-content {
+            opacity: 0;
         }
     </style>
 </head>
 <body>
     <div class="overlay-container">
-        <!-- Team 1 Score -->
-        <div class="team-score team-1" id="team1Container">
-            <span class="team-name" id="team1Name">Team 1</span>
-            <span class="team-points" id="team1Score">0</span>
-        </div>
-        
-        <!-- Team 2 Score -->
-        <div class="team-score team-2" id="team2Container">
-            <span class="team-name" id="team2Name">Team 2</span>
-            <span class="team-points" id="team2Score">0</span>
-        </div>
-        
         <!-- Question Card -->
         <div class="question-container" id="questionContainer">
+            <!-- Integrated Header with Scores and Phase -->
+            <div class="integrated-header">
+                <div class="score-pill team-1">
+                    <span class="team-name" id="team1Name">Team 1</span>
+                    <span class="team-points" id="team1Score">0</span>
+                </div>
+                
+                <div class="phase-badge" id="phaseBadge">Phase 1</div>
+                
+                <div class="score-pill team-2">
+                    <span class="team-points" id="team2Score">0</span>
+                    <span class="team-name" id="team2Name">Team 2</span>
+                </div>
+            </div>
+
             <div class="question-card">
                 <!-- Placeholder Logo -->
                 <div id="placeholderLogoContainer">
                     <img id="placeholderLogo" src="">
                 </div>
 
-                <div class="phase-badge" id="phaseBadge">Phase 1</div>
                 <div class="question-text" id="questionText">Question goes here?</div>
                 
                 <!-- Three Words Clue (Phase 2) -->
@@ -554,8 +563,6 @@
         const questionContainer = document.getElementById('questionContainer');
         const questionCard = document.querySelector('.question-card');
         const questionText = document.getElementById('questionText');
-        const team1Container = document.getElementById('team1Container');
-        const team2Container = document.getElementById('team2Container');
         const propositionsGrid = document.getElementById('propositionsGrid');
         const cluesContainer = document.getElementById('cluesContainer');
         const summaryContainer = document.getElementById('summaryContainer');
@@ -601,6 +608,17 @@
             3: 'Phase 3 - Résume foireux'
         };
 
+        function hexToRgba(hex, alpha) {
+            hex = hex.replace('#', '');
+            if (hex.length === 3) {
+                hex = hex.split('').map(c => c + c).join('');
+            }
+            const r = parseInt(hex.substring(0, 2), 16);
+            const g = parseInt(hex.substring(2, 4), 16);
+            const b = parseInt(hex.substring(4, 6), 16);
+            return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+        }
+
         backgroundColorRep.on('change', (newVal) => {
             document.body.style.backgroundColor = newVal;
         });
@@ -613,15 +631,24 @@
 
             const isHidden = question.state === 'hidden';
 
+            // Always show container to keep scores visible
+            questionContainer.classList.add('visible');
+
+            if (isHidden) {
+                phaseBadge.classList.add('hidden');
+            } else {
+                phaseBadge.classList.remove('hidden');
+            }
+
             if (isHidden && logoUrl) {
-                questionContainer.classList.add('visible');
                 questionCard.classList.add('logo-mode');
+                questionCard.classList.remove('hidden-content');
                 placeholderLogo.src = logoUrl;
             } else if (isHidden && !logoUrl) {
-                questionContainer.classList.remove('visible');
+                questionCard.classList.add('hidden-content');
                 questionCard.classList.remove('logo-mode');
             } else {
-                questionContainer.classList.add('visible');
+                questionCard.classList.remove('hidden-content');
                 questionCard.classList.remove('logo-mode');
             }
         }
@@ -633,12 +660,13 @@
             
             const questionType = newVal.type || 'multipleChoice';
             const phase = newVal.phase || 1;
-            const isMultipleChoice = questionType === 'multipleChoice' || questionType === 'trueFalse';
+            const isTrueFalse = questionType === 'trueFalse';
+            const isMultipleChoice = questionType === 'multipleChoice' || isTrueFalse;
             const isThreeWords = questionType === 'threeWordsClue';
             const isFunnySummary = questionType === 'funnySummary';
-            const hasPropositions = newVal.propositions && newVal.propositions.length > 0 && newVal.propositions.some(p => p && p.trim() !== '');
             
-            // Update phase badge
+            const hasPropositions = newVal.propositions && newVal.propositions.length > 0;
+           
             phaseBadge.textContent = phaseLabels[phase] || `Phase ${phase}`;
             
             // Show/hide appropriate containers based on question type
@@ -671,7 +699,6 @@
             
             // Show wrong feedback for open questions when a team answered wrong (and not revealed)
             if ((isThreeWords || isFunnySummary) && newVal.openWrongTeam && newVal.state === 'showing') {
-                // Get team name from scores replicant
                 const teamKey = newVal.openWrongTeam;
                 let teamName = teamKey === 'team1' ? 'Équipe 1' : 'Équipe 2';
                 if (scoresRep.value && scoresRep.value[teamKey]) {
@@ -709,7 +736,6 @@
                     currentPropCount = 3;
                 }
 
-                // Update propositions
                 if (newVal.propositions) {
                     newVal.propositions.forEach((prop, i) => {
                         if (i < currentPropCount && propElements[i]) {
@@ -719,12 +745,10 @@
                     });
                 }
                 
-                // Hide unused propositions for True/False questions
                 for (let i = currentPropCount; i < propElements.length; i++) {
                     if (propElements[i]) propElements[i].classList.add('hidden');
                 }
                 
-                // Handle correct answer reveal and wrong answer feedback
                 for (let i = 0; i < currentPropCount; i++) {
                     const el = propElements[i];
                     if (!el) continue;
@@ -782,25 +806,14 @@
             const team2Color = newVal.team2.color || '#ff6b6b';
             document.documentElement.style.setProperty('--team1-color', team1Color);
             document.documentElement.style.setProperty('--team2-color', team2Color);
+            document.documentElement.style.setProperty('--team1-shadow', hexToRgba(team1Color, 0.3));
+            document.documentElement.style.setProperty('--team2-shadow', hexToRgba(team2Color, 0.3));
         });
         
-
         layoutRep.on('change', (newVal) => {
             if (!newVal) return;
             
-            // Position Team 1
-            if (newVal.team1) {
-                team1Container.style.left = `${newVal.team1.x}px`;
-                team1Container.style.top = `${newVal.team1.y}px`;
-            }
-            
-            // Position Team 2
-            if (newVal.team2) {
-                team2Container.style.left = `${newVal.team2.x}px`;
-                team2Container.style.top = `${newVal.team2.y}px`;
-            }
-            
-            // Position Question
+            // Position Question only (Teams are integrated)
             if (newVal.question) {
                 questionContainer.style.left = `${newVal.question.x}px`;
                 questionContainer.style.top = `${newVal.question.y}px`;
