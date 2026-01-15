@@ -39,11 +39,6 @@
     ],
     "graphics": [
       {
-        "file": "overlay.html",
-        "width": 1920,
-        "height": 1080
-      },
-      {
         "file": "overlay-integrated.html",
         "width": 1920,
         "height": 1080

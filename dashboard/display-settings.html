@@ -123,16 +123,25 @@
     </div>
 
     <div class="section">
-        <h3>Background Color</h3>
-        <p class="info">Changes the background color for both the overlay and participant screens.</p>
-        <input type="color" id="colorPicker" style="width: 100%; height: 40px; border: none; padding: 0; border-radius: 4px; cursor: pointer;">
+        <h3>Background Gradient</h3>
+        <p class="info">Changes the background gradient. Accent + UI surfaces are derived automatically for readability (team colors stay unchanged).</p>
+        <div style="display: flex; gap: 15px; margin-top: 10px;">
+            <div style="flex: 1;">
+                <label>Color 1 (Start)</label>
+                <input type="color" id="gradientColor1" style="width: 100%; height: 40px; border: none; padding: 0; border-radius: 4px; cursor: pointer;">
+            </div>
+            <div style="flex: 1;">
+                <label>Color 2 (End)</label>
+                <input type="color" id="gradientColor2" style="width: 100%; height: 40px; border: none; padding: 0; border-radius: 4px; cursor: pointer;">
+            </div>
+        </div>
     </div>
 
     <div class="section">
         <h3>Graphics URLs</h3>
         <div class="info">
-            <strong>Stream Overlay:</strong><br>
-            <code style="color: #00d9ff; word-break: break-all;">http://localhost:9090/bundles/quiz-overlay/graphics/overlay.html</code>
+            <strong>Stream Overlay (Integrated):</strong><br>
+            <code style="color: #00d9ff; word-break: break-all;">http://localhost:9090/bundles/quiz-overlay/graphics/overlay-integrated.html</code>
         </div>
         <div class="info" style="margin-top: 10px;">
             <strong>Participant View:</strong><br>
@@ -144,15 +153,17 @@
         // --- Replicants ---
         const logoUrlRep = nodecg.Replicant('logoUrl', { defaultValue: '' });
         const assetsRep = nodecg.Replicant('assets:images');
-        const backgroundColorRep = nodecg.Replicant('backgroundColor', { defaultValue: '#1a1a2e' });
+        const gradientColor1Rep = nodecg.Replicant('gradientColor1', { defaultValue: '#224aa8' });
+        const gradientColor2Rep = nodecg.Replicant('gradientColor2', { defaultValue: '#b56fdc' });
 
         // --- Logo Elements ---
         const logoSelect = document.getElementById('logoSelect');
         const logoPreviewEl = document.getElementById('logoPreview');
         const clearLogoBtn = document.getElementById('clearLogo');
 
-        // --- Background Color Elements ---
-        const colorPicker = document.getElementById('colorPicker');
+        // --- Background Gradient Elements ---
+        const gradientColor1Picker = document.getElementById('gradientColor1');
+        const gradientColor2Picker = document.getElementById('gradientColor2');
 
         // --- Generic Functions ---
         function populateAssetDropdown(selectElement, assets, currentValue) {
@@ -198,13 +209,21 @@
             logoSelect.value = '';
         });
 
-        // --- Background Color Logic ---
-        backgroundColorRep.on('change', (newVal) => {
-            colorPicker.value = newVal || '#1a1a2e';
+        // --- Background Gradient Logic ---
+        gradientColor1Rep.on('change', (newVal) => {
+            gradientColor1Picker.value = newVal || '#224aa8';
         });
 
-        colorPicker.addEventListener('input', () => {
-            backgroundColorRep.value = colorPicker.value;
+        gradientColor2Rep.on('change', (newVal) => {
+            gradientColor2Picker.value = newVal || '#b56fdc';
+        });
+
+        gradientColor1Picker.addEventListener('input', () => {
+            gradientColor1Rep.value = gradientColor1Picker.value;
+        });
+
+        gradientColor2Picker.addEventListener('input', () => {
+            gradientColor2Rep.value = gradientColor2Picker.value;
         });
     </script>
 </body>

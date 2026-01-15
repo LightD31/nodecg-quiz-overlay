@@ -3,9 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quiz - Participant View</title>
+    <title>Quiz - Participant View (Global Theme)</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap');
+
+        :root {
+            --theme-bg: #1a1a2e;
+            --theme-surface: rgba(255, 255, 255, 0.08);
+            --theme-surface-2: rgba(255, 255, 255, 0.05);
+            --theme-text: rgba(255, 255, 255, 0.92);
+            --theme-text-strong: #ffffff;
+            --theme-muted: rgba(255, 255, 255, 0.55);
+
+            --theme-accent: #7a0000;
+            --theme-accent-rgb: 122, 0, 0;
+            --theme-accent-soft: rgba(122, 0, 0, 0.14);
+            --theme-border: rgba(122, 0, 0, 0.55);
+            --theme-border-soft: rgba(122, 0, 0, 0.28);
+
+            --theme-success: #00ff88;
+            --theme-success-rgb: 0, 255, 136;
+            --theme-danger: #ff4444;
+            --theme-danger-rgb: 255, 68, 68;
+        }
         
         * {
             box-sizing: border-box;
@@ -18,8 +38,8 @@
             width: 100vw;
             height: 100vh;
             overflow: hidden;
-            background-color: #1a1a2e;
-            transition: background-color 0.3s ease;
+            background: linear-gradient(135deg, #224aa8, #b56fdc);
+            transition: background 0.3s ease;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -55,15 +75,15 @@
         }
         
         .question-card {
-            background: rgba(255, 255, 255, 0.05);
+            background: var(--theme-surface);
             border-radius: 30px;
             padding: 50px 60px;
             backdrop-filter: blur(20px);
-            border: 3px solid rgba(0, 217, 255, 0.4);
+            border: 3px solid var(--theme-border);
             box-shadow: 
-                0 25px 80px rgba(0, 0, 0, 0.5),
-                inset 0 0 60px rgba(0, 217, 255, 0.05);
-            min-height: 400px; /* Ensure a minimum height */
+                0 25px 80px rgba(0, 0, 0, 0.35),
+                inset 0 0 60px var(--theme-accent-soft);
+            min-height: 400px;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -85,11 +105,11 @@
         .question-text {
             font-size: 42px;
             font-weight: 700;
-            color: #fff;
+            color: var(--theme-text-strong);
             text-align: center;
             margin-bottom: 50px;
             line-height: 1.4;
-            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
             transition: all 0.5s ease;
          }
         
@@ -130,22 +150,22 @@
         }
         
         .clue-word {
-            background: linear-gradient(135deg, rgba(0, 217, 255, 0.25) 0%, rgba(0, 136, 255, 0.15) 100%);
-            border: 3px solid #00d9ff;
+            background: linear-gradient(135deg, rgba(var(--theme-accent-rgb), 0.25) 0%, rgba(var(--theme-accent-rgb), 0.15) 100%);
+            border: 3px solid var(--theme-accent);
             border-radius: 25px;
             padding: 35px 55px;
             font-size: 48px;
             font-weight: 700;
-            color: #fff;
-            text-shadow: 0 3px 15px rgba(0, 0, 0, 0.5);
-            box-shadow: 0 15px 50px rgba(0, 217, 255, 0.35);
+            color: var(--theme-text-strong);
+            text-shadow: 0 3px 15px rgba(0, 0, 0, 0.35);
+            box-shadow: 0 15px 50px rgba(var(--theme-accent-rgb), 0.35);
             white-space: nowrap;
             transition: all 0.5s ease;
         }
         
         .clue-separator {
             font-size: 56px;
-            color: #00d9ff;
+            color: var(--theme-accent);
             font-weight: bold;
             transition: all 0.5s ease;
         }
@@ -159,14 +179,14 @@
         .summary-text {
             font-size: 42px;
             font-weight: 500;
-            color: #fff;
+            color: var(--theme-text-strong);
             font-style: italic;
             line-height: 1.5;
             padding: 40px 60px;
-            background: linear-gradient(135deg, rgba(255, 165, 2, 0.2) 0%, rgba(255, 107, 107, 0.15) 100%);
-            border: 3px solid rgba(255, 165, 2, 0.5);
+            background: linear-gradient(135deg, rgba(var(--theme-accent-rgb), 0.20) 0%, rgba(var(--theme-accent-rgb), 0.12) 100%);
+            border: 3px solid var(--theme-border-soft);
             border-radius: 25px;
-            text-shadow: 0 3px 15px rgba(0, 0, 0, 0.5);
+            text-shadow: 0 3px 15px rgba(0, 0, 0, 0.35);
             transition: all 0.5s ease;
         }
         
@@ -185,12 +205,12 @@
             margin-top: 30px;
             opacity: 1;
             transform: translateY(0);
-            max-height: 200px; /* A safe value */
+            max-height: 200px;
         }
         
         .answer-label {
             font-size: 28px;
-            color: #00ff88;
+            color: var(--theme-success);
             text-transform: uppercase;
             letter-spacing: 4px;
             margin-bottom: 15px;
@@ -200,8 +220,8 @@
         .answer-text {
             font-size: 56px;
             font-weight: 700;
-            color: #00ff88;
-            text-shadow: 0 0 40px rgba(0, 255, 136, 0.5);
+            color: var(--theme-success);
+            text-shadow: 0 0 40px rgba(var(--theme-success-rgb), 0.45);
             transition: all 0.5s ease;
         }
         
@@ -220,13 +240,13 @@
             margin-top: 30px;
             opacity: 1;
             transform: translateY(0);
-            max-height: 200px; /* Adjust to a suitable max-height */
+            max-height: 200px;
         }
         
         .wrong-feedback {
             display: inline-block;
-            background: rgba(255, 68, 68, 0.25);
-            border: 3px solid #ff4444;
+            background: rgba(var(--theme-danger-rgb), 0.22);
+            border: 3px solid var(--theme-danger);
             border-radius: 20px;
             padding: 20px 50px;
             animation: shake 0.6s ease-in-out;
@@ -234,7 +254,7 @@
         
         .wrong-feedback-team {
             font-size: 24px;
-            color: #ff6b6b;
+            color: var(--theme-danger);
             font-weight: 600;
             margin-bottom: 8px;
             transition: all 0.5s ease;
@@ -243,7 +263,7 @@
         .wrong-feedback-text {
             font-size: 32px;
             font-weight: 700;
-            color: #ff4444;
+            color: var(--theme-danger);
             transition: all 0.5s ease;
         }
 
@@ -252,8 +272,9 @@
         }
         
         .proposition {
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%);
+            background: var(--theme-surface-2);
             border: 3px solid rgba(255, 255, 255, 0.15);
+            border-color: var(--theme-border-soft);
             border-radius: 20px;
             padding: 30px 35px;
             display: flex;
@@ -263,33 +284,33 @@
         }
         
         .proposition.correct {
-            background: linear-gradient(135deg, rgba(0, 255, 136, 0.3) 0%, rgba(0, 255, 136, 0.1) 100%);
-            border-color: #00ff88;
+            background: linear-gradient(135deg, rgba(var(--theme-success-rgb), 0.30) 0%, rgba(var(--theme-success-rgb), 0.10) 100%);
+            border-color: var(--theme-success);
             box-shadow: 
-                0 0 40px rgba(0, 255, 136, 0.4),
-                inset 0 0 30px rgba(0, 255, 136, 0.1);
+                0 0 40px rgba(var(--theme-success-rgb), 0.32),
+                inset 0 0 30px rgba(var(--theme-success-rgb), 0.10);
             transform: scale(1.02);
         }
         
         .proposition.correct .prop-letter {
-            background: #00ff88;
+            background: var(--theme-success);
             color: #000;
-            border-color: #00ff88;
+            border-color: var(--theme-success);
         }
         
         .proposition.wrong {
-            background: linear-gradient(135deg, rgba(255, 68, 68, 0.35) 0%, rgba(255, 68, 68, 0.15) 100%);
-            border-color: #ff4444;
+            background: linear-gradient(135deg, rgba(var(--theme-danger-rgb), 0.30) 0%, rgba(var(--theme-danger-rgb), 0.12) 100%);
+            border-color: var(--theme-danger);
             box-shadow: 
-                0 0 40px rgba(255, 68, 68, 0.5),
-                inset 0 0 30px rgba(255, 68, 68, 0.15);
+                0 0 40px rgba(var(--theme-danger-rgb), 0.34),
+                inset 0 0 30px rgba(var(--theme-danger-rgb), 0.12);
             transform: scale(0.98);
         }
         
         .proposition.wrong .prop-letter {
-            background: #ff4444;
+            background: var(--theme-danger);
             color: #fff;
-            border-color: #ff4444;
+            border-color: var(--theme-danger);
         }
         
         .proposition.eliminated {
@@ -301,12 +322,12 @@
         
         .proposition.eliminated .prop-letter {
             background: rgba(100, 100, 100, 0.5);
-            color: #888;
+            color: var(--theme-muted);
             border-color: #666;
         }
         
         .proposition.eliminated .prop-text {
-            color: #888;
+            color: var(--theme-muted);
             text-decoration: line-through;
         }
         
@@ -314,21 +335,21 @@
             width: 60px;
             height: 60px;
             border-radius: 50%;
-            background: rgba(0, 217, 255, 0.2);
-            border: 3px solid #00d9ff;
+            background: rgba(var(--theme-accent-rgb), 0.20);
+            border: 3px solid var(--theme-accent);
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 28px;
             font-weight: 800;
-            color: #00d9ff;
+            color: var(--theme-accent);
             flex-shrink: 0;
             transition: all 0.4s ease;
         }
         
         .prop-text {
             font-size: 28px;
-            color: #fff;
+            color: var(--theme-text);
             font-weight: 600;
             line-height: 1.3;
         }
@@ -336,7 +357,7 @@
         /* Waiting State */
         .waiting-message {
             text-align: center;
-            color: rgba(255, 255, 255, 0.5);
+            color: var(--theme-muted);
             font-size: 32px;
             font-weight: 600;
         }
@@ -394,7 +415,7 @@
         }
         
         .score-pill {
-            background: rgba(255, 255, 255, 0.1);
+            background: var(--theme-surface);
             backdrop-filter: blur(15px);
             padding: 25px 80px;
             border-radius: 80px;
@@ -405,39 +426,55 @@
             transition: all 0.3s ease;
             position: relative;
             z-index: 1;
-            border: 3px solid rgba(255,255,255,0.1);
+            border: 3px solid var(--theme-border-soft);
             min-width: 500px;
+            overflow: hidden;
+            box-shadow: 0 18px 60px rgba(0, 0, 0, 0.35);
+        }
+
+        .score-pill::before {
+            display: none;
         }
 
         .score-pill.team-1 {
-            background: var(--team1-color, #00d9ff);
-            background-image: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(0,0,0,0) 100%);
-            box-shadow: 0 10px 40px var(--team1-shadow, rgba(0, 217, 255, 0.3));
+            --pill-accent-rgb: var(--team1-color-rgb, 0, 217, 255);
+            --pill-accent-shadow: var(--team1-shadow, rgba(0, 217, 255, 0.5));
+            background: rgba(var(--team1-color-rgb, 0, 217, 255), 0.80);
+            border-color: rgba(var(--team1-color-rgb, 0, 217, 255), 0.95);
+            box-shadow:
+                0 18px 60px rgba(0, 0, 0, 0.35),
+                0 12px 45px var(--team1-shadow, rgba(0, 217, 255, 0.5));
         }
 
         .score-pill.team-2 {
-            background: var(--team2-color, #ff6b6b);
-            background-image: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(0,0,0,0) 100%);
-            box-shadow: 0 10px 40px var(--team2-shadow, rgba(255, 107, 107, 0.3));
+            --pill-accent-rgb: var(--team2-color-rgb, 255, 107, 107);
+            --pill-accent-shadow: var(--team2-shadow, rgba(255, 107, 107, 0.5));
+            background: rgba(var(--team2-color-rgb, 255, 107, 107), 0.80);
+            border-color: rgba(var(--team2-color-rgb, 255, 107, 107), 0.95);
+            box-shadow:
+                0 18px 60px rgba(0, 0, 0, 0.35),
+                0 12px 45px var(--team2-shadow, rgba(255, 107, 107, 0.5));
         }
 
         .score-pill .team-name {
             font-size: 56px;
             font-weight: 600;
-            color: #fff;
+            color: rgba(255, 255, 255, 0.96);
             max-width: 500px;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            text-shadow: 0 2px 6px rgba(0,0,0,0.35);
             transition: all 0.3s ease;
         }
         
         .score-pill .team-points {
             font-size: 96px;
             font-weight: 800;
-            color: #fff;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            color: rgba(255, 255, 255, 0.98);
+            text-shadow:
+                0 2px 8px rgba(0,0,0,0.40),
+                0 0 26px rgba(var(--pill-accent-rgb, 255, 255, 255), 0.22);
             min-width: 120px;
             text-align: center;
             transition: all 0.3s ease;
@@ -528,7 +565,8 @@
         const questionRep = nodecg.Replicant('question');
         const scoresRep = nodecg.Replicant('scores');
         const logoUrlRep = nodecg.Replicant('logoUrl');
-        const backgroundColorRep = nodecg.Replicant('backgroundColor', { defaultValue: '#1a1a2e' });
+        const gradientColor1Rep = nodecg.Replicant('gradientColor1', { defaultValue: '#224aa8' });
+        const gradientColor2Rep = nodecg.Replicant('gradientColor2', { defaultValue: '#b56fdc' });
         
         const questionContainer = document.getElementById('questionContainer');
         const questionCard = document.getElementById('questionCard');
@@ -542,9 +580,8 @@
         const summaryText = document.getElementById('summaryText');
         const wrongFeedbackContainer = document.getElementById('wrongFeedbackContainer');
         const wrongFeedbackTeam = document.getElementById('wrongFeedbackTeam');
-        const placeholderLogoContainer = document.getElementById('placeholderLogoContainer');
         const placeholderLogo = document.getElementById('placeholderLogo');
-        
+
         const clueElements = [
             document.getElementById('clue0'),
             document.getElementById('clue1'),
@@ -571,8 +608,104 @@
         ];
         const propLetters = ['A', 'B', 'C', 'D'];
 
-        backgroundColorRep.on('change', (newVal) => {
-            document.body.style.backgroundColor = newVal;
+        function hexToRgb(hex) {
+            if (!hex) return null;
+            const cleaned = hex.replace('#', '');
+            if (cleaned.length !== 3 && cleaned.length !== 6) return null;
+            const full = cleaned.length === 3 ? cleaned.split('').map(c => c + c).join('') : cleaned;
+            const r = parseInt(full.substring(0, 2), 16);
+            const g = parseInt(full.substring(2, 4), 16);
+            const b = parseInt(full.substring(4, 6), 16);
+            return { r, g, b };
+        }
+
+        function rgbToHex({ r, g, b }) {
+            const toHex = (n) => n.toString(16).padStart(2, '0');
+            return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+        }
+
+        function mixRgb(a, b, t) {
+            const clamped = Math.max(0, Math.min(1, t));
+            return {
+                r: Math.round(a.r + (b.r - a.r) * clamped),
+                g: Math.round(a.g + (b.g - a.g) * clamped),
+                b: Math.round(a.b + (b.b - a.b) * clamped)
+            };
+        }
+
+        function approxLuminance({ r, g, b }) {
+            return (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+        }
+
+        function setCssVar(name, value) {
+            document.documentElement.style.setProperty(name, value);
+        }
+
+        function applyTheme(backgroundHex) {
+            const bg = backgroundHex || '#1a1a2e';
+
+            const bgRgb = hexToRgb(bg) || { r: 26, g: 26, b: 46 };
+            const isLightBg = approxLuminance(bgRgb) > 0.58;
+            const contrastTarget = isLightBg ? { r: 0, g: 0, b: 0 } : { r: 255, g: 255, b: 255 };
+
+            // Accent derived from background (same hue family, higher contrast).
+            const accentRgb = mixRgb(bgRgb, contrastTarget, isLightBg ? 0.72 : 0.65);
+            const accent = rgbToHex(accentRgb);
+
+            setCssVar('--theme-bg', bg);
+
+            // Surfaces derived from background (slightly pushed towards contrastTarget).
+            const surface1Rgb = mixRgb(bgRgb, contrastTarget, 0.14);
+            const surface2Rgb = mixRgb(bgRgb, contrastTarget, 0.20);
+            setCssVar('--theme-surface', `rgba(${surface1Rgb.r}, ${surface1Rgb.g}, ${surface1Rgb.b}, ${isLightBg ? 0.72 : 0.14})`);
+            setCssVar('--theme-surface-2', `rgba(${surface2Rgb.r}, ${surface2Rgb.g}, ${surface2Rgb.b}, ${isLightBg ? 0.58 : 0.09})`);
+
+            if (isLightBg) {
+                setCssVar('--theme-text', 'rgba(27, 13, 13, 0.92)');
+                setCssVar('--theme-text-strong', '#1b0d0d');
+                setCssVar('--theme-muted', 'rgba(27, 13, 13, 0.55)');
+            } else {
+                setCssVar('--theme-text', 'rgba(255, 255, 255, 0.92)');
+                setCssVar('--theme-text-strong', '#ffffff');
+                setCssVar('--theme-muted', 'rgba(255, 255, 255, 0.55)');
+            }
+
+            setCssVar('--theme-accent', accent);
+            setCssVar('--theme-accent-rgb', `${accentRgb.r}, ${accentRgb.g}, ${accentRgb.b}`);
+            setCssVar('--theme-accent-soft', `rgba(${accentRgb.r}, ${accentRgb.g}, ${accentRgb.b}, 0.14)`);
+            setCssVar('--theme-border', `rgba(${accentRgb.r}, ${accentRgb.g}, ${accentRgb.b}, 0.55)`);
+            setCssVar('--theme-border-soft', `rgba(${accentRgb.r}, ${accentRgb.g}, ${accentRgb.b}, 0.28)`);
+
+            // Status colors: keep green/red hue, adjust lightness for readability on the chosen background.
+            const baseSuccessRgb = { r: 0, g: 255, b: 136 };
+            const baseDangerRgb = { r: 255, g: 68, b: 68 };
+            const statusMix = isLightBg ? { t: 0.58, target: { r: 0, g: 0, b: 0 } } : { t: 0.16, target: { r: 255, g: 255, b: 255 } };
+            const successRgb = mixRgb(baseSuccessRgb, statusMix.target, statusMix.t);
+            const dangerRgb = mixRgb(baseDangerRgb, statusMix.target, statusMix.t);
+            setCssVar('--theme-success', rgbToHex(successRgb));
+            setCssVar('--theme-success-rgb', `${successRgb.r}, ${successRgb.g}, ${successRgb.b}`);
+            setCssVar('--theme-danger', rgbToHex(dangerRgb));
+            setCssVar('--theme-danger-rgb', `${dangerRgb.r}, ${dangerRgb.g}, ${dangerRgb.b}`);
+
+            document.body.style.background = `linear-gradient(135deg, ${window.currentGradientColor1 || '#224aa8'}, ${window.currentGradientColor2 || '#b56fdc'})`;
+        }
+
+        function applyGradient(color1, color2) {
+            window.currentGradientColor1 = color1 || '#224aa8';
+            window.currentGradientColor2 = color2 || '#b56fdc';
+            document.body.style.background = `linear-gradient(135deg, ${window.currentGradientColor1}, ${window.currentGradientColor2})`;
+            // Apply theme based on the first gradient color for UI elements
+            applyTheme(window.currentGradientColor1);
+        }
+
+        gradientColor1Rep.on('change', (newVal) => {
+            window.currentGradientColor1 = newVal || '#224aa8';
+            applyGradient(window.currentGradientColor1, window.currentGradientColor2);
+        });
+
+        gradientColor2Rep.on('change', (newVal) => {
+            window.currentGradientColor2 = newVal || '#b56fdc';
+            applyGradient(window.currentGradientColor1, window.currentGradientColor2);
         });
 
         function hexToRgba(hex, alpha) {
@@ -595,18 +728,15 @@
             const isHidden = question.state === 'hidden' || !question.text;
 
             if (isHidden && logoUrl) {
-                // Show logo in question container
                 placeholderLogo.src = logoUrl;
                 questionCard.classList.add('logo-mode');
                 questionContainer.classList.add('visible');
                 waitingMessage.classList.add('hidden');
             } else if (isHidden && !logoUrl) {
-                // Show waiting message
                 questionContainer.classList.remove('visible');
                 waitingMessage.classList.remove('hidden');
                 questionCard.classList.remove('logo-mode');
             } else {
-                // Show question
                 questionContainer.classList.add('visible');
                 waitingMessage.classList.add('hidden');
                 questionCard.classList.remove('logo-mode');
@@ -632,6 +762,11 @@
             document.documentElement.style.setProperty('--team2-color', team2Color);
             document.documentElement.style.setProperty('--team1-shadow', hexToRgba(team1Color, 0.3));
             document.documentElement.style.setProperty('--team2-shadow', hexToRgba(team2Color, 0.3));
+
+            const team1Rgb = hexToRgb(team1Color) || { r: 0, g: 217, b: 255 };
+            const team2Rgb = hexToRgb(team2Color) || { r: 255, g: 107, b: 107 };
+            document.documentElement.style.setProperty('--team1-color-rgb', `${team1Rgb.r}, ${team1Rgb.g}, ${team1Rgb.b}`);
+            document.documentElement.style.setProperty('--team2-color-rgb', `${team2Rgb.r}, ${team2Rgb.g}, ${team2Rgb.b}`);
         });
         
         let wrongAnimationTimeout = null;
@@ -642,16 +777,14 @@
             updateVisibility();
             
             const questionType = newVal.type || 'multipleChoice';
-            const isMultipleChoice = questionType === 'multipleChoice' || questionType === 'trueFalse';
             const isThreeWords = questionType === 'threeWordsClue';
             const isFunnySummary = questionType === 'funnySummary';
             const isTrueFalse = questionType === 'trueFalse';
             
             const hasPropositions = newVal.propositions && newVal.propositions.length > 0;
             
-            // Show/hide appropriate containers based on question type
             if (hasPropositions) {
-                propositionsGrid.style.display = ''; // Let CSS handle flex/grid
+                propositionsGrid.style.display = '';
                 if (isThreeWords || isFunnySummary) {
                     propositionsGrid.classList.add('special-mode');
                     propositionsGrid.classList.remove('true-false');
@@ -666,11 +799,8 @@
             cluesContainer.style.display = isThreeWords ? 'flex' : 'none';
             summaryContainer.style.display = isFunnySummary ? 'block' : 'none';
             
-            
-            // Update question text
             questionText.textContent = newVal.text || 'Question goes here?';
             
-            // Handle Three Words Clue
             if (isThreeWords && newVal.clues) {
                 newVal.clues.forEach((clue, i) => {
                     if (clueElements[i]) {
@@ -679,12 +809,10 @@
                 });
             }
             
-            // Handle Funny Summary
             if (isFunnySummary && newVal.summary) {
                 summaryText.textContent = `"${newVal.summary}"`;
             }
             
-            // Show answer container only for phases 2 & 3 when revealed and there is an answer
             if ((isThreeWords || isFunnySummary) && newVal.state === 'revealed' && newVal.answer && !hasPropositions) {
                 answerContainer.classList.add('visible');
                 answerText.textContent = newVal.answer;
@@ -693,7 +821,6 @@
                 answerContainer.classList.remove('visible');
             }
             
-            // Show wrong feedback for open questions when a team answered wrong (and not revealed)
             if ((isThreeWords || isFunnySummary) && newVal.openWrongTeam && newVal.state === 'showing') {
                 const teamKey = newVal.openWrongTeam;
                 let teamName = teamKey === 'team1' ? 'Équipe 1' : 'Équipe 2';
@@ -706,7 +833,6 @@
                 wrongFeedbackContainer.classList.remove('visible');
             }
             
-            // Handle Multiple Choice propositions
             if (hasPropositions) {
                 let currentPropCount = 4;
                 if (isTrueFalse) {
@@ -716,20 +842,18 @@
                 }
 
                 if (newVal.propositions) {
-                newVal.propositions.forEach((prop, i) => {
+                    newVal.propositions.forEach((prop, i) => {
                         if (i < currentPropCount && propElements[i]) {
                             if (propTexts[i]) propTexts[i].textContent = prop || `Answer ${propLetters[i]}`;
                             propElements[i].classList.remove('hidden');
-                    }
-                });
+                        }
+                    });
                 }
                 
-                // Hide unused propositions for True/False questions
                 for (let i = currentPropCount; i < propElements.length; i++) {
                     if (propElements[i]) propElements[i].classList.add('hidden');
                 }
                 
-                // Handle correct answer reveal and wrong answer feedback
                 for (let i = 0; i < currentPropCount; i++) {
                     const el = propElements[i];
                     if (!el) continue;
@@ -774,3 +898,5 @@
 
         logoUrlRep.on('change', updateVisibility);
     </script>
+</body>
+</html>

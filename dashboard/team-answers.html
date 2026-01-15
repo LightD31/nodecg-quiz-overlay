@@ -26,8 +26,20 @@
             font-size: 14px;
             text-transform: uppercase;
         }
-        .team1 h3 { color: var(--team1-color, #00d9ff); }
-        .team2 h3 { color: var(--team2-color, #ff6b6b); }
+        .team1 h3 { 
+            background: var(--team1-color, #00d9ff);
+            color: var(--team1-text-color, #000000);
+            padding: 8px;
+            border-radius: 4px;
+            text-align: center;
+        }
+        .team2 h3 { 
+            background: var(--team2-color, #ff6b6b);
+            color: var(--team2-text-color, #000000);
+            padding: 8px;
+            border-radius: 4px;
+            text-align: center;
+        }
         
         /* Question Selector */
         .question-nav {
@@ -224,20 +236,20 @@
             gap: 8px;
         }
         .team1 .answer-btn {
-            background: color-mix(in srgb, var(--team1-color, #00d9ff) 20%, transparent);
-            color: var(--team1-color, #00d9ff);
+            background: var(--team1-color, #00d9ff);
+            color: var(--team1-text-color, #000000);
             border: 2px solid var(--team1-color, #00d9ff);
         }
         .team1 .answer-btn:hover:not(:disabled) {
-            background: color-mix(in srgb, var(--team1-color, #00d9ff) 40%, transparent);
+            filter: brightness(1.1);
         }
         .team2 .answer-btn {
-            background: color-mix(in srgb, var(--team2-color, #ff6b6b) 20%, transparent);
-            color: var(--team2-color, #ff6b6b);
+            background: var(--team2-color, #ff6b6b);
+            color: var(--team2-text-color, #000000);
             border: 2px solid var(--team2-color, #ff6b6b);
         }
         .team2 .answer-btn:hover:not(:disabled) {
-            background: color-mix(in srgb, var(--team2-color, #ff6b6b) 40%, transparent);
+            filter: brightness(1.1);
         }
         .answer-btn:disabled {
             opacity: 0.3;
@@ -405,8 +417,18 @@
             font-weight: bold;
             margin-bottom: 8px;
         }
-        .team1 .team-score { color: var(--team1-color, #00d9ff); }
-        .team2 .team-score { color: var(--team2-color, #ff6b6b); }
+        .team1 .team-score { 
+            background: var(--team1-color, #00d9ff);
+            color: var(--team1-text-color, #000000);
+            padding: 5px;
+            border-radius: 4px;
+        }
+        .team2 .team-score { 
+            background: var(--team2-color, #ff6b6b);
+            color: var(--team2-text-color, #000000);
+            padding: 5px;
+            border-radius: 4px;
+        }
         
         /* Teams Container */
         .teams-container {
@@ -863,6 +885,21 @@
             team2Result.classList.remove('show', 'correct', 'wrong');
         }
         
+        function getContrastColor(hexcolor) {
+            // Default to black if invalid
+            if (!hexcolor) return '#000000';
+            hexcolor = hexcolor.replace('#', '');
+            if (hexcolor.length === 3) {
+                hexcolor = hexcolor.split('').map(c => c + c).join('');
+            }
+            if (hexcolor.length !== 6) return '#000000';
+            const r = parseInt(hexcolor.substring(0, 2), 16);
+            const g = parseInt(hexcolor.substring(2, 4), 16);
+            const b = parseInt(hexcolor.substring(4, 6), 16);
+            const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+            return (yiq >= 128) ? '#000000' : '#ffffff';
+        }
+
         scoresRep.on('change', (newVal) => {
             if (!newVal) return;
             team1Title.textContent = newVal.team1.name || 'Team 1';
@@ -875,6 +912,8 @@
             const team2Color = newVal.team2.color || '#ff6b6b';
             document.documentElement.style.setProperty('--team1-color', team1Color);
             document.documentElement.style.setProperty('--team2-color', team2Color);
+            document.documentElement.style.setProperty('--team1-text-color', getContrastColor(team1Color));
+            document.documentElement.style.setProperty('--team2-text-color', getContrastColor(team2Color));
         });
         
         // Helper to update UI based on selected question (without loading it to replicant)
@@ -1000,6 +1039,8 @@
                             eliminatedAnswers = data.eliminatedAnswers || [];
                             if (revealToggle.checked) {
                                 resultText = `✗ Wrong! Answer was ${data.correctAnswer}`;
+                                isCorrectlyAnswered = true;
+                                await fetch('/quiz-overlay/api/question/reveal', { method: 'POST' });
                             } else {
                                 resultText = `✗ Wrong! Try again!`;
                             }
