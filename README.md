@@ -150,12 +150,21 @@ Simulate a team pressing an answer button (A, B, C, or D). This handles scoring 
 
 ## Development
 
-The bundle has no runtime dependencies. To run the unit tests for the question
-parsing and validation logic:
+The bundle has no runtime dependencies. To run the unit tests:
 
 ```sh
 npm test
 ```
+
+### Layout
+
+*   `extension/` - the NodeCG extension. `questions.js` holds the question
+    parsing and validation; `index.js` wires up the replicants and the HTTP API.
+*   `dashboard/` - the control panels.
+*   `graphics/` - the two graphics. `overlay-integrated.html` is the stream
+    overlay and `participant.html` is the screen the teams look at. They are
+    styled independently, but share their theme derivation and question
+    rendering through `graphics/js/theme.js` and `graphics/js/question-view.js`.
 
 ## Assets
 

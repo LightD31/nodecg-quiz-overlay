@@ -561,13 +561,27 @@
         </div>
     </div>
 
+    <script src="js/theme.js"></script>
+    <script src="js/question-view.js"></script>
     <script>
         const questionRep = nodecg.Replicant('question');
         const scoresRep = nodecg.Replicant('scores');
         const logoUrlRep = nodecg.Replicant('logoUrl');
         const gradientColor1Rep = nodecg.Replicant('gradientColor1', { defaultValue: '#224aa8' });
         const gradientColor2Rep = nodecg.Replicant('gradientColor2', { defaultValue: '#b56fdc' });
-        
+
+        // Shared with overlay-integrated.html - see graphics/js/.
+        const { applyGradient, hexToRgb, hexToRgba } = QuizTheme;
+        const {
+            isThreeWords,
+            isFunnySummary,
+            hasPropositions,
+            applyGridMode,
+            renderCluesAndSummary,
+            renderPropositions,
+            renderWrongFeedback
+        } = QuizQuestionView;
+
         const questionContainer = document.getElementById('questionContainer');
         const questionCard = document.getElementById('questionCard');
         const questionText = document.getElementById('questionText');
@@ -606,97 +620,6 @@
             document.getElementById('prop2'),
             document.getElementById('prop3')
         ];
-        const propLetters = ['A', 'B', 'C', 'D'];
-
-        function hexToRgb(hex) {
-            if (!hex) return null;
-            const cleaned = hex.replace('#', '');
-            if (cleaned.length !== 3 && cleaned.length !== 6) return null;
-            const full = cleaned.length === 3 ? cleaned.split('').map(c => c + c).join('') : cleaned;
-            const r = parseInt(full.substring(0, 2), 16);
-            const g = parseInt(full.substring(2, 4), 16);
-            const b = parseInt(full.substring(4, 6), 16);
-            return { r, g, b };
-        }
-
-        function rgbToHex({ r, g, b }) {
-            const toHex = (n) => n.toString(16).padStart(2, '0');
-            return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
-        }
-
-        function mixRgb(a, b, t) {
-            const clamped = Math.max(0, Math.min(1, t));
-            return {
-                r: Math.round(a.r + (b.r - a.r) * clamped),
-                g: Math.round(a.g + (b.g - a.g) * clamped),
-                b: Math.round(a.b + (b.b - a.b) * clamped)
-            };
-        }
-
-        function approxLuminance({ r, g, b }) {
-            return (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-        }
-
-        function setCssVar(name, value) {
-            document.documentElement.style.setProperty(name, value);
-        }
-
-        function applyTheme(backgroundHex) {
-            const bg = backgroundHex || '#1a1a2e';
-
-            const bgRgb = hexToRgb(bg) || { r: 26, g: 26, b: 46 };
-            const isLightBg = approxLuminance(bgRgb) > 0.58;
-            const contrastTarget = isLightBg ? { r: 0, g: 0, b: 0 } : { r: 255, g: 255, b: 255 };
-
-            // Accent derived from background (same hue family, higher contrast).
-            const accentRgb = mixRgb(bgRgb, contrastTarget, isLightBg ? 0.72 : 0.65);
-            const accent = rgbToHex(accentRgb);
-
-            setCssVar('--theme-bg', bg);
-
-            // Surfaces derived from background (slightly pushed towards contrastTarget).
-            const surface1Rgb = mixRgb(bgRgb, contrastTarget, 0.14);
-            const surface2Rgb = mixRgb(bgRgb, contrastTarget, 0.20);
-            setCssVar('--theme-surface', `rgba(${surface1Rgb.r}, ${surface1Rgb.g}, ${surface1Rgb.b}, ${isLightBg ? 0.72 : 0.14})`);
-            setCssVar('--theme-surface-2', `rgba(${surface2Rgb.r}, ${surface2Rgb.g}, ${surface2Rgb.b}, ${isLightBg ? 0.58 : 0.09})`);
-
-            if (isLightBg) {
-                setCssVar('--theme-text', 'rgba(27, 13, 13, 0.92)');
-                setCssVar('--theme-text-strong', '#1b0d0d');
-                setCssVar('--theme-muted', 'rgba(27, 13, 13, 0.55)');
-            } else {
-                setCssVar('--theme-text', 'rgba(255, 255, 255, 0.92)');
-                setCssVar('--theme-text-strong', '#ffffff');
-                setCssVar('--theme-muted', 'rgba(255, 255, 255, 0.55)');
-            }
-
-            setCssVar('--theme-accent', accent);
-            setCssVar('--theme-accent-rgb', `${accentRgb.r}, ${accentRgb.g}, ${accentRgb.b}`);
-            setCssVar('--theme-accent-soft', `rgba(${accentRgb.r}, ${accentRgb.g}, ${accentRgb.b}, 0.14)`);
-            setCssVar('--theme-border', `rgba(${accentRgb.r}, ${accentRgb.g}, ${accentRgb.b}, 0.55)`);
-            setCssVar('--theme-border-soft', `rgba(${accentRgb.r}, ${accentRgb.g}, ${accentRgb.b}, 0.28)`);
-
-            // Status colors: keep green/red hue, adjust lightness for readability on the chosen background.
-            const baseSuccessRgb = { r: 0, g: 255, b: 136 };
-            const baseDangerRgb = { r: 255, g: 68, b: 68 };
-            const statusMix = isLightBg ? { t: 0.58, target: { r: 0, g: 0, b: 0 } } : { t: 0.16, target: { r: 255, g: 255, b: 255 } };
-            const successRgb = mixRgb(baseSuccessRgb, statusMix.target, statusMix.t);
-            const dangerRgb = mixRgb(baseDangerRgb, statusMix.target, statusMix.t);
-            setCssVar('--theme-success', rgbToHex(successRgb));
-            setCssVar('--theme-success-rgb', `${successRgb.r}, ${successRgb.g}, ${successRgb.b}`);
-            setCssVar('--theme-danger', rgbToHex(dangerRgb));
-            setCssVar('--theme-danger-rgb', `${dangerRgb.r}, ${dangerRgb.g}, ${dangerRgb.b}`);
-
-            document.body.style.background = `linear-gradient(135deg, ${window.currentGradientColor1 || '#224aa8'}, ${window.currentGradientColor2 || '#b56fdc'})`;
-        }
-
-        function applyGradient(color1, color2) {
-            window.currentGradientColor1 = color1 || '#224aa8';
-            window.currentGradientColor2 = color2 || '#b56fdc';
-            document.body.style.background = `linear-gradient(135deg, ${window.currentGradientColor1}, ${window.currentGradientColor2})`;
-            // Apply theme based on the first gradient color for UI elements
-            applyTheme(window.currentGradientColor1);
-        }
 
         gradientColor1Rep.on('change', (newVal) => {
             window.currentGradientColor1 = newVal || '#224aa8';
@@ -707,17 +630,6 @@
             window.currentGradientColor2 = newVal || '#b56fdc';
             applyGradient(window.currentGradientColor1, window.currentGradientColor2);
         });
-
-        function hexToRgba(hex, alpha) {
-            hex = hex.replace('#', '');
-            if (hex.length === 3) {
-                hex = hex.split('').map(c => c + c).join('');
-            }
-            const r = parseInt(hex.substring(0, 2), 16);
-            const g = parseInt(hex.substring(2, 4), 16);
-            const b = parseInt(hex.substring(4, 6), 16);
-            return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-        }
 
         function updateVisibility() {
             const question = questionRep.value;
@@ -769,134 +681,33 @@
             document.documentElement.style.setProperty('--team2-color-rgb', `${team2Rgb.r}, ${team2Rgb.g}, ${team2Rgb.b}`);
         });
         
-        let wrongAnimationTimeout = null;
-        
         questionRep.on('change', (newVal) => {
             if (!newVal) return;
 
             updateVisibility();
-            
-            const questionType = newVal.type || 'multipleChoice';
-            const isThreeWords = questionType === 'threeWordsClue';
-            const isFunnySummary = questionType === 'funnySummary';
-            const isTrueFalse = questionType === 'trueFalse';
-            
-            const hasPropositions = newVal.propositions && newVal.propositions.length > 0;
-            
-            if (hasPropositions) {
-                propositionsGrid.style.display = '';
-                if (isThreeWords || isFunnySummary) {
-                    propositionsGrid.classList.add('special-mode');
-                    propositionsGrid.classList.remove('true-false');
-                } else {
-                    propositionsGrid.classList.remove('special-mode');
-                    propositionsGrid.classList.toggle('true-false', isTrueFalse);
-                }
-            } else {
-                propositionsGrid.style.display = 'none';
-            }
 
-            cluesContainer.style.display = isThreeWords ? 'flex' : 'none';
-            summaryContainer.style.display = isFunnySummary ? 'block' : 'none';
-            
+            applyGridMode(newVal, propositionsGrid);
+            renderCluesAndSummary(newVal, cluesContainer, clueElements, summaryContainer, summaryText);
+
             questionText.textContent = newVal.text || 'Question goes here?';
-            
-            if (isThreeWords && newVal.clues) {
-                newVal.clues.forEach((clue, i) => {
-                    if (clueElements[i]) {
-                        clueElements[i].textContent = clue;
-                    }
-                });
-            }
-            
-            if (isFunnySummary && newVal.summary) {
-                summaryText.textContent = `"${newVal.summary}"`;
-            }
-            
-            if ((isThreeWords || isFunnySummary) && newVal.state === 'revealed' && newVal.answer && !hasPropositions) {
+
+            // The participant view only shows the answer once there is one to
+            // show; the stream overlay falls back to a placeholder.
+            const isOpenAnswer = (isThreeWords(newVal) || isFunnySummary(newVal)) && !hasPropositions(newVal);
+            if (isOpenAnswer && newVal.state === 'revealed' && newVal.answer) {
                 answerContainer.classList.add('visible');
                 answerText.textContent = newVal.answer;
-                wrongFeedbackContainer.classList.remove('visible');
             } else {
                 answerContainer.classList.remove('visible');
             }
-            
-            if ((isThreeWords || isFunnySummary) && newVal.openWrongTeam && newVal.state === 'showing') {
-                const teamKey = newVal.openWrongTeam;
-                let teamName = teamKey === 'team1' ? 'Équipe 1' : 'Équipe 2';
-                if (scoresRep.value && scoresRep.value[teamKey]) {
-                    teamName = scoresRep.value[teamKey].name || teamName;
-                }
-                wrongFeedbackTeam.textContent = teamName;
-                wrongFeedbackContainer.classList.add('visible');
-            } else {
-                wrongFeedbackContainer.classList.remove('visible');
-            }
-            
-            if (hasPropositions) {
-                let currentPropCount = 4;
-                if (isTrueFalse) {
-                    currentPropCount = 2;
-                } else if (isThreeWords || isFunnySummary) {
-                    currentPropCount = 3;
-                }
 
-                if (newVal.propositions) {
-                    newVal.propositions.forEach((prop, i) => {
-                        if (i < currentPropCount && propElements[i]) {
-                            if (propTexts[i]) propTexts[i].textContent = prop || `Answer ${propLetters[i]}`;
-                            propElements[i].classList.remove('hidden');
-                        }
-                    });
-                }
-                
-                for (let i = currentPropCount; i < propElements.length; i++) {
-                    if (propElements[i]) propElements[i].classList.add('hidden');
-                }
-                
-                for (let i = 0; i < currentPropCount; i++) {
-                    const el = propElements[i];
-                    if (!el) continue;
-                    
-                    const isLastWrong = newVal.lastWrongAnswer == i;
-                    const isEliminated = newVal.eliminatedAnswers && newVal.eliminatedAnswers.some(a => a == i);
-                    
-                    if (isLastWrong && newVal.state === 'showing') {
-                        el.classList.remove('correct', 'eliminated');
-                        el.classList.add('wrong');
-                        
-                        if (!newVal.showCorrectOnWrong) {
-                            if (wrongAnimationTimeout) clearTimeout(wrongAnimationTimeout);
-                            wrongAnimationTimeout = setTimeout(() => {
-                                el.classList.remove('wrong');
-                                el.classList.add('eliminated');
-                            }, 800);
-                        }
-                    } else {
-                        el.classList.remove('correct', 'wrong', 'eliminated');
-                        
-                        if (newVal.state === 'showing' && isEliminated && !isLastWrong) {
-                            el.classList.add('eliminated');
-                        }
-                        
-                        if (newVal.state === 'showing' && newVal.showCorrectOnWrong && i == newVal.correctAnswer) {
-                            el.classList.add('correct');
-                        }
-                        
-                        if (newVal.state === 'revealed') {
-                            if (i == newVal.correctAnswer) {
-                                el.classList.add('correct');
-                            }
-                            if (isEliminated) {
-                                el.classList.add('eliminated');
-                            }
-                        }
-                    }
-                }
-            }
+            renderWrongFeedback(newVal, scoresRep.value, wrongFeedbackContainer, wrongFeedbackTeam);
+
+            renderPropositions(newVal, propElements, propTexts);
         });
 
         logoUrlRep.on('change', updateVisibility);
+    
     </script>
 </body>
 </html>
