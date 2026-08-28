@@ -113,18 +113,35 @@ rejected outright and the previously loaded questions are cleared.
 
 The bundle exposes an HTTP API at `/quiz-overlay/api/` for advanced control. This allows for integration with external software like Bitfocus Companion.
 
+### Response codes
+
+Every endpoint answers with a status code describing what happened, so a client
+can tell a refusal from a success without parsing the body.
+
+| Code | Meaning | Example |
+| --- | --- | --- |
+| `200` | The request was carried out. | Question shown, point added. |
+| `400` | The request itself is malformed. | Unknown team, an answer option that is not `a`-`d`, a non-numeric question index. |
+| `404` | The thing addressed does not exist. | No question at that index, no such question file. |
+| `409` | Understood, but it conflicts with the current state. | Nothing is loaded, the answer is already revealed, that answer is already eliminated, there is no next question, or an answer button was pressed on a question that is answered out loud. |
+| `422` | The question file exists but could not be parsed. | Invalid JSON, or no `questions` array. |
+| `503` | A replicant is not ready yet. | Requested before NodeCG finished starting up. |
+
+A successful response body is `{ "success": true, ... }`; a refusal is
+`{ "error": "..." }` explaining what was wrong.
+
 ### Endpoints
 
 #### Status & Files
 *   `GET /api/status`: Get the current state of the quiz.
 *   `GET /api/files`: Get list of available question files.
-*   `POST /api/files/load/:filename`: Load a specific question file.
+*   `POST /api/files/load/:filename`: Load a specific question file. `404` if the file is not in the list, `422` if it cannot be parsed.
 *   `POST /api/files/refresh`: Refresh the file list.
 
 #### Question Navigation & Control
 *   `POST /api/question/next`: Move to the next question.
 *   `POST /api/question/previous`: Move to the previous question.
-*   `POST /api/question/show/:index`: Load and show a specific question by index (0-based).
+*   `POST /api/question/show/:index`: Load and show a specific question by index (0-based). `400` if the index is not a number, `404` if there is no question there.
 *   `POST /api/question/show`: Show the current question (if hidden).
 *   `POST /api/question/hide`: Hide the current question.
 *   `POST /api/question/reveal`: Reveal the current answer.
@@ -142,6 +159,10 @@ The bundle exposes an HTTP API at `/quiz-overlay/api/` for advanced control. Thi
 
 #### Direct Answering (Auto-scoring)
 Simulate a team pressing an answer button (A, B, C, or D). This handles scoring and elimination logic automatically.
+
+Answers are bounded by the question's real options: a True/False question refuses
+`c` and `d` with `409`, and a question answered out loud refuses all four - score
+those with `/api/score/:team/add` and `/api/question/openWrong/:team` instead.
 *   `POST /api/team1/answer/:option`: Team 1 answers. Replace `:option` with `a`, `b`, `c`, or `d`.
 *   `POST /api/team2/answer/:option`: Team 2 answers. Replace `:option` with `a`, `b`, `c`, or `d`.
 
