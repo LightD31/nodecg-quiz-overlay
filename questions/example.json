@@ -1,0 +1,38 @@
+{
+  "questions": [
+    {
+      "type": "multipleChoice",
+      "text": "What is the capital of France?",
+      "propositions": ["London", "Berlin", "Paris", "Madrid"],
+      "correctAnswer": 2,
+      "phase": 1
+    },
+    {
+      "type": "multipleChoice",
+      "text": "Which planet is closest to the Sun?",
+      "propositions": ["Venus", "Mercury", "Mars", "Earth"],
+      "correctAnswer": 1,
+      "phase": 1
+    },
+    {
+      "type": "trueFalse",
+      "text": "The Earth is flat.",
+      "correctAnswer": 1,
+      "phase": 1
+    },
+    {
+      "type": "threeWordsClue",
+      "text": "Identify the movie from these three words:",
+      "clues": ["Witch", "Lion", "Wardrobe"],
+      "answer": "The Chronicles of Narnia",
+      "phase": 2
+    },
+    {
+      "type": "funnySummary",
+      "text": "What is this movie?",
+      "summary": "A billionaire beats up a mentally ill person.",
+      "answer": "Batman",
+      "phase": 3
+    }
+  ]
+}
