@@ -82,9 +82,27 @@
             margin-top: 10px;
             font-size: 12px;
             color: #aaa;
-            max-height: 60px;
+            max-height: 160px;
             overflow: hidden;
             text-overflow: ellipsis;
+        }
+        .live-indicator {
+            font-size: 11px;
+            color: #666;
+            text-align: center;
+            margin-top: 4px;
+        }
+        .live-indicator.on-air {
+            color: #00ff88;
+        }
+        .question-issues {
+            color: #ffa502;
+            font-size: 11px;
+            margin-top: 6px;
+            white-space: pre-line;
+        }
+        .question-issues:empty {
+            display: none;
         }
         .current-question-preview .correct-answer {
             color: #00ff88;
@@ -512,9 +530,11 @@
             <button id="nextQuestion" class="nav-btn">▶</button>
         </div>
         <div class="question-counter" id="questionCounter">No questions loaded</div>
+        <div class="live-indicator" id="liveIndicator">Nothing on air</div>
         <div class="current-question-preview" id="questionPreview">
             <div id="previewText">Select a question to preview</div>
             <div class="correct-answer" id="previewAnswer"></div>
+            <div class="question-issues" id="previewIssues"></div>
         </div>
     </div>
 
@@ -606,6 +626,9 @@
         const questionFilesRep = nodecg.Replicant('questionFiles', { 
             defaultValue: { files: [], currentFile: '' } 
         });
+        // Which question the extension actually has loaded. Tracked by the
+        // extension so this panel never has to guess.
+        const currentIndexRep = nodecg.Replicant('currentQuestionIndex', { defaultValue: -1 });
         
         // Elements
         const statusBar = document.getElementById('statusBar');
@@ -629,6 +652,8 @@
         const btnRefreshFiles = document.getElementById('btnRefreshFiles');
         const currentFileDisplay = document.getElementById('currentFileDisplay');
         const previewAnswer = document.getElementById('previewAnswer');
+        const previewIssues = document.getElementById('previewIssues');
+        const liveIndicator = document.getElementById('liveIndicator');
         
         // New elements for phases 2 & 3
         const phaseIndicator = document.getElementById('phaseIndicator');
@@ -644,7 +669,10 @@
         
         // State
         let questions = [];
+        // The question being previewed in this panel; -1 when nothing is selected.
         let currentIndex = -1;
+        // The question the extension currently has on air; -1 when nothing is.
+        let liveIndex = -1;
         let currentCorrectAnswer = -1;
         let isCorrectlyAnswered = false;
         let eliminatedAnswers = [];
@@ -722,33 +750,111 @@
             if (!newVal) return;
             questions = newVal;
             populateQuestionSelect();
-            questionCounter.textContent = `${questions.length} questions loaded`;
+            if (currentIndex >= questions.length) {
+                currentIndex = -1;
+                questionSelect.value = -1;
+            }
+            updateCounters();
         });
         
+        // Question files are hand-written JSON, so nothing below may assume a
+        // field is present or of the right type - a single bad question used to
+        // throw in here and leave the whole selector empty.
+        const MAX_LABEL_LENGTH = 35;
+
+        function questionLabel(q) {
+            const type = q.type || 'multipleChoice';
+            let label;
+
+            if (type === 'threeWordsClue' && Array.isArray(q.clues) && q.clues.length > 0) {
+                label = q.clues.join(' • ');
+            } else if (type === 'funnySummary' && q.summary) {
+                label = q.summary;
+            } else {
+                label = q.text || '';
+            }
+
+            label = String(label).trim();
+            if (!label) return '(no text)';
+            return label.length > MAX_LABEL_LENGTH ? `${label.slice(0, MAX_LABEL_LENGTH)}…` : label;
+        }
+
+        function correctAnswerLabel(q) {
+            const type = q.type || 'multipleChoice';
+            const propositions = Array.isArray(q.propositions) ? q.propositions : [];
+
+            // Open questions are answered out loud, so the answer is free text.
+            if ((type === 'threeWordsClue' || type === 'funnySummary') && propositions.length === 0) {
+                return q.answer || '(no answer set)';
+            }
+
+            if (type === 'trueFalse') {
+                if (q.correctAnswer !== 0 && q.correctAnswer !== 1) return '(not set)';
+                return q.correctAnswer === 0 ? 'Vrai' : 'Faux';
+            }
+
+            if (!Number.isInteger(q.correctAnswer) || q.correctAnswer < 0 || q.correctAnswer >= propositions.length) {
+                return '(not set)';
+            }
+            return `${String.fromCharCode(65 + q.correctAnswer)} - ${propositions[q.correctAnswer]}`;
+        }
+
+        // Build clue tags as real nodes so a clue containing < or & renders as text.
+        function renderClues(container, clues) {
+            container.textContent = '';
+            if (!Array.isArray(clues) || clues.length === 0) {
+                container.style.display = 'none';
+                return;
+            }
+            clues.forEach(clue => {
+                const tag = document.createElement('span');
+                tag.className = 'clue-tag';
+                tag.textContent = clue;
+                container.appendChild(tag);
+            });
+            container.style.display = 'flex';
+        }
+
         function populateQuestionSelect() {
             questionSelect.innerHTML = '<option value="-1">-- Select a question --</option>';
             questions.forEach((q, i) => {
                 const option = document.createElement('option');
                 option.value = i;
                 const phasePrefix = q.phase ? `[P${q.phase}] ` : '';
-                const displayText = q.type === 'threeWordsClue' ? q.clues.join(' • ') : 
-                                   q.type === 'funnySummary' ? q.summary.substring(0, 35) + '...' :
-                                   q.text.substring(0, 35);
-                option.textContent = `${i + 1}. ${phasePrefix}${displayText}${displayText.length >= 35 ? '...' : ''}`;
+                const warning = (Array.isArray(q.issues) && q.issues.length > 0) ? '⚠ ' : '';
+                option.textContent = `${warning}${i + 1}. ${phasePrefix}${questionLabel(q)}`;
                 questionSelect.appendChild(option);
             });
         }
+
+        function updateCounters() {
+            if (questions.length === 0) {
+                questionCounter.textContent = 'No questions loaded';
+            } else if (currentIndex >= 0) {
+                questionCounter.textContent = `Previewing question ${currentIndex + 1} of ${questions.length}`;
+            } else {
+                questionCounter.textContent = `${questions.length} questions loaded`;
+            }
+
+            if (liveIndex >= 0 && liveIndex < questions.length) {
+                liveIndicator.textContent = `On air: question ${liveIndex + 1} - ${questionLabel(questions[liveIndex])}`;
+                liveIndicator.className = 'live-indicator on-air';
+            } else {
+                liveIndicator.textContent = 'Nothing on air';
+                liveIndicator.className = 'live-indicator';
+            }
+        }
+
+        currentIndexRep.on('change', (newVal) => {
+            liveIndex = typeof newVal === 'number' ? newVal : -1;
+            updateCounters();
+        });
         
         function updateQuestionPreviewUI(newVal) {
             const isOpen = isOpenQuestionType(newVal);
             
             // Show/hide clues preview
-            if (newVal.type === 'threeWordsClue' && newVal.clues) {
-                cluesPreview.innerHTML = newVal.clues.map(c => `<span class="clue-tag">${c}</span>`).join('');
-                cluesPreview.style.display = 'flex';
-            } else {
-                cluesPreview.style.display = 'none';
-            }
+            renderClues(cluesPreview, newVal.type === 'threeWordsClue' ? newVal.clues : null);
             
             // Show/hide summary preview
             if (newVal.type === 'funnySummary' && newVal.summary) {
@@ -769,33 +875,30 @@
             if (index < 0 || index >= questions.length) {
                 previewText.textContent = 'Select a question to preview';
                 previewAnswer.textContent = '';
+                previewIssues.textContent = '';
                 return;
             }
+
             const q = questions[index];
             const questionType = q.type || 'multipleChoice';
-            const isTrueFalse = questionType === 'trueFalse';
             const isThreeWords = questionType === 'threeWordsClue';
             const isFunnySummary = questionType === 'funnySummary';
-            
+
             // Update preview text based on question type
-            if (isThreeWords) {
-                previewText.textContent = q.clues ? q.clues.join(' • ') : q.text;
-            } else if (isFunnySummary) {
-                previewText.textContent = q.summary || q.text;
+            if (isThreeWords && Array.isArray(q.clues) && q.clues.length > 0) {
+                previewText.textContent = q.clues.join(' • ');
+            } else if (isFunnySummary && q.summary) {
+                previewText.textContent = q.summary;
             } else {
-                previewText.textContent = q.text;
+                previewText.textContent = q.text || '(no text)';
             }
-            
-            // Update correct answer preview
-            let correctLabel;
-            if (isThreeWords || isFunnySummary) {
-                correctLabel = q.answer;
-            } else if (isTrueFalse) {
-                correctLabel = q.correctAnswer === 0 ? 'Vrai' : 'Faux';
-            } else {
-                correctLabel = String.fromCharCode(65 + q.correctAnswer) + ' - ' + q.propositions[q.correctAnswer];
-            }
-            previewAnswer.textContent = `Correct: ${correctLabel}`;
+
+            previewAnswer.textContent = `Correct: ${correctAnswerLabel(q)}`;
+
+            // Surface anything the extension flagged while loading the file.
+            previewIssues.textContent = (Array.isArray(q.issues) && q.issues.length > 0)
+                ? `⚠ ${q.issues.join('\n⚠ ')}`
+                : '';
         }
         
         function updateButtonStates() {
@@ -945,12 +1048,7 @@
             phaseIndicator.className = `phase-indicator phase-${currentPhase}`;
             
             // Show/hide clues preview
-            if (q.type === 'threeWordsClue' && q.clues) {
-                cluesPreview.innerHTML = q.clues.map(c => `<span class="clue-tag">${c}</span>`).join('');
-                cluesPreview.style.display = 'flex';
-            } else {
-                cluesPreview.style.display = 'none';
-            }
+            renderClues(cluesPreview, q.type === 'threeWordsClue' ? q.clues : null);
             
             // Show/hide summary preview
             if (q.type === 'funnySummary' && q.summary) {
@@ -985,32 +1083,30 @@
                     eliminatedAnswers = [];
                     hideResults();
                     await fetch(`/quiz-overlay/api/question/show/${index}`, { method: 'POST' });
-                    questionCounter.textContent = `Question ${index + 1} of ${questions.length}`;
+                    updateCounters();
                 } catch (error) {
                     console.error('Failed to auto-show question:', error);
                 }
             }
         });
         
-        document.getElementById('prevQuestion').addEventListener('click', async () => {
-            if (currentIndex > 0) {
-                currentIndex--;
-                questionSelect.value = currentIndex;
-                updatePreview(currentIndex);
-                updateUIForSelectedQuestion(currentIndex);
-                updateButtonStates();
-            }
-        });
-        
-        document.getElementById('nextQuestion').addEventListener('click', async () => {
-            if (currentIndex < questions.length - 1) {
-                currentIndex++;
-                questionSelect.value = currentIndex;
-                updatePreview(currentIndex);
-                updateUIForSelectedQuestion(currentIndex);
-                updateButtonStates();
-            }
-        });
+        // These arrows only move the preview - they never change what is on air.
+        // With nothing selected yet they continue from the live question.
+        function movePreview(step) {
+            const from = currentIndex >= 0 ? currentIndex : liveIndex;
+            const target = from + step;
+            if (target < 0 || target >= questions.length) return;
+
+            currentIndex = target;
+            questionSelect.value = currentIndex;
+            updatePreview(currentIndex);
+            updateUIForSelectedQuestion(currentIndex);
+            updateCounters();
+            updateButtonStates();
+        }
+
+        document.getElementById('prevQuestion').addEventListener('click', () => movePreview(-1));
+        document.getElementById('nextQuestion').addEventListener('click', () => movePreview(1));
         
         // Answer buttons
         allButtons.forEach(btn => {
@@ -1130,7 +1226,7 @@
                     eliminatedAnswers = [];
                     hideResults();
                     await fetch(`/quiz-overlay/api/question/show/${currentIndex}`, { method: 'POST' });
-                    questionCounter.textContent = `Question ${currentIndex + 1} of ${questions.length}`;
+                    updateCounters();
                 } catch (error) {
                     console.error('Failed to show question:', error);
                 }
@@ -1163,7 +1259,8 @@
                     currentIndex = data.question - 1;
                     questionSelect.value = currentIndex;
                     updatePreview(currentIndex);
-                    questionCounter.textContent = `Question ${currentIndex + 1} of ${questions.length}`;
+                    updateUIForSelectedQuestion(currentIndex);
+                    updateCounters();
                 }
             } catch (error) {
                 console.error('Failed to go to next question:', error);
@@ -1213,6 +1310,9 @@
                 if (data.success) {
                     currentIndex = 0;
                     questionSelect.value = 0;
+                    updatePreview(0);
+                    updateUIForSelectedQuestion(0);
+                    updateCounters();
                     isCorrectlyAnswered = false;
                     eliminatedAnswers = [];
                     hideResults();

@@ -43,11 +43,11 @@
         .draggable {
             position: absolute;
             cursor: move;
-            padding: 6px 10px;
             border-radius: 3px;
             font-size: 9px;
             font-weight: bold;
             user-select: none;
+            touch-action: none;
             border: 2px solid transparent;
             white-space: nowrap;
         }
@@ -55,19 +55,36 @@
             border-color: #00d9ff;
             z-index: 100;
         }
-        .draggable.team1 {
+        .draggable.question {
+            width: 200px;
+            text-align: center;
+        }
+        /* The scores live inside the question card's header on the overlay, so the
+           preview shows them riding along with it rather than as separate handles. */
+        .card-scores {
+            display: flex;
+            justify-content: space-between;
+            gap: 6px;
+            margin-bottom: 2px;
+        }
+        .card-score {
+            padding: 1px 6px;
+            border-radius: 6px;
+            font-size: 8px;
+        }
+        .card-score.team1 {
             background: rgba(0, 217, 255, 0.4);
             color: #00d9ff;
         }
-        .draggable.team2 {
+        .card-score.team2 {
             background: rgba(255, 107, 107, 0.4);
             color: #ff6b6b;
         }
-        .draggable.question {
+        .card-body {
             background: rgba(255, 255, 255, 0.15);
             color: #fff;
-            width: 200px;
-            text-align: center;
+            padding: 6px 10px;
+            border-radius: 3px;
         }
         .btn {
             padding: 8px 16px;
@@ -96,32 +113,31 @@
             color: #00d9ff;
             margin-bottom: 10px;
         }
+        .note {
+            font-size: 10px;
+            color: #888;
+            background: #0f0f23;
+            border-left: 3px solid #00d9ff;
+            padding: 8px 10px;
+            border-radius: 3px;
+            margin-top: 15px;
+            line-height: 1.5;
+        }
         .coord-inputs {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 10px;
             margin-top: 15px;
         }
         .coord-group {
             background: #0f0f23;
             padding: 10px;
             border-radius: 4px;
-        }
-        .coord-group label {
-            display: block;
-            font-size: 10px;
-            color: #888;
-            margin-bottom: 5px;
-            text-transform: uppercase;
+            max-width: 200px;
         }
         .coord-group .title {
             font-size: 11px;
             font-weight: bold;
             margin-bottom: 8px;
+            color: #fff;
         }
-        .coord-group.team1 .title { color: #00d9ff; }
-        .coord-group.team2 .title { color: #ff6b6b; }
-        .coord-group.question .title { color: #fff; }
         .coord-row {
             display: flex;
             gap: 5px;
@@ -142,76 +158,29 @@
             color: #666;
             line-height: 24px;
         }
-        .toggle-row {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-top: 15px;
-            padding: 10px;
-            background: #0f0f23;
-            border-radius: 4px;
-        }
-        .toggle-row input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-            accent-color: #00d9ff;
-            cursor: pointer;
-        }
-        .toggle-row label {
-            font-size: 12px;
-            color: #ccc;
-            cursor: pointer;
-        }
-        .toggle-row .hint {
-            font-size: 10px;
-            color: #666;
-            margin-left: auto;
-        }
     </style>
 </head>
 <body>
     <div class="section">
         <h3>Stream Overlay Layout</h3>
         <div class="resolution">Resolution: 1920 × 1080</div>
-        <div class="info">Drag elements or enter pixel coordinates below</div>
-        
+        <div class="info">Drag the card or enter pixel coordinates below</div>
+
         <div class="preview-wrapper">
             <div class="preview-container" id="previewContainer">
-                <div class="draggable team1" id="dragTeam1">Team 1</div>
-                <div class="draggable team2" id="dragTeam2">Team 2</div>
-                <div class="draggable question" id="dragQuestion">Question & Answers</div>
+                <div class="draggable question" id="dragQuestion">
+                    <div class="card-scores">
+                        <span class="card-score team1">Team 1</span>
+                        <span class="card-score team2">Team 2</span>
+                    </div>
+                    <div class="card-body">Question &amp; Answers</div>
+                </div>
             </div>
         </div>
-        
+
         <div class="coord-inputs">
-            <div class="coord-group team1">
-                <div class="title">Team 1</div>
-                <div class="coord-row">
-                    <span>X:</span>
-                    <input type="number" id="team1X" min="0" max="1920" step="1">
-                    <span>px</span>
-                </div>
-                <div class="coord-row">
-                    <span>Y:</span>
-                    <input type="number" id="team1Y" min="0" max="1080" step="1">
-                    <span>px</span>
-                </div>
-            </div>
-            <div class="coord-group team2">
-                <div class="title">Team 2</div>
-                <div class="coord-row">
-                    <span>X:</span>
-                    <input type="number" id="team2X" min="0" max="1920" step="1">
-                    <span>px</span>
-                </div>
-                <div class="coord-row">
-                    <span>Y:</span>
-                    <input type="number" id="team2Y" min="0" max="1080" step="1">
-                    <span>px</span>
-                </div>
-            </div>
             <div class="coord-group question">
-                <div class="title">Question</div>
+                <div class="title">Question card</div>
                 <div class="coord-row">
                     <span>X:</span>
                     <input type="number" id="questionX" min="0" max="1920" step="1">
@@ -224,13 +193,13 @@
                 </div>
             </div>
         </div>
-        
-        <div class="toggle-row">
-            <input type="checkbox" id="symmetryToggle">
-            <label for="symmetryToggle">Symmetrical Scores</label>
-            <span class="hint">Mirror X position, same Y</span>
+
+        <div class="note">
+            X is the horizontal centre of the card, Y is its top edge.
+            The team scores are part of the card's header, so they move with it and
+            have no position of their own.
         </div>
-        
+
         <div style="margin-top: 15px;">
             <button id="resetLayout" class="btn btn-warning">Reset to Default</button>
         </div>
@@ -243,46 +212,26 @@
         const PREVIEW_HEIGHT = 180;
         const SCALE = PREVIEW_WIDTH / CANVAS_WIDTH;
 
+        const DEFAULT_LAYOUT = {
+            team1: { x: 250, y: 100 },
+            team2: { x: 1670, y: 100 },
+            question: { x: 960, y: 600 }
+        };
+
+        // team1/team2 are kept in the replicant for backwards compatibility, but
+        // overlay-integrated.html only reads `question` - the scores are rendered
+        // inside the question card's header, so they are not positioned separately.
         const layoutRep = nodecg.Replicant('overlayLayout', {
-            defaultValue: {
-                team1: { x: 250, y: 100 },
-                team2: { x: 1670, y: 100 },
-                question: { x: 960, y: 600 }
-            }
+            defaultValue: DEFAULT_LAYOUT
         });
 
         const previewContainer = document.getElementById('previewContainer');
-        const draggables = {
-            team1: document.getElementById('dragTeam1'),
-            team2: document.getElementById('dragTeam2'),
-            question: document.getElementById('dragQuestion')
-        };
-        const inputs = {
-            team1: { x: document.getElementById('team1X'), y: document.getElementById('team1Y') },
-            team2: { x: document.getElementById('team2X'), y: document.getElementById('team2Y') },
-            question: { x: document.getElementById('questionX'), y: document.getElementById('questionY') }
-        };
+        const dragQuestion = document.getElementById('dragQuestion');
+        const inputX = document.getElementById('questionX');
+        const inputY = document.getElementById('questionY');
 
-        let activeDraggable = null;
-        let offsetX = 0;
-        let offsetY = 0;
-        
-        const symmetryToggle = document.getElementById('symmetryToggle');
-        
-        function applySymmetry(sourceTeam, x, y) {
-            if (!symmetryToggle.checked) return;
-            
-            const targetTeam = sourceTeam === 'team1' ? 'team2' : 'team1';
-            // For center-anchored elements, mirror around the canvas center (960)
-            // Element at x=100 should mirror to x=1820 (960 + (960-100) = 1820)
-            const centerX = CANVAS_WIDTH / 2;
-            const distanceFromCenter = centerX - x;
-            const mirroredX = centerX + distanceFromCenter;
-            
-            if (layoutRep.value) {
-                layoutRep.value[targetTeam] = { x: mirroredX, y: y };
-            }
-        }
+        let dragging = false;
+        let grabOffsetY = 0;
 
         function pixelToPreview(px) {
             return px * SCALE;
@@ -292,138 +241,93 @@
             return Math.round(preview / SCALE);
         }
 
-        function updatePositions(layout) {
-            if (!layout) return;
-            
-            Object.keys(draggables).forEach(key => {
-                const el = draggables[key];
-                const pos = layout[key];
-                if (pos) {
-                    const previewX = pixelToPreview(pos.x);
-                    const previewY = pixelToPreview(pos.y);
-                    
-                    el.style.left = `${previewX}px`;
-                    el.style.top = `${previewY}px`;
-                    
-                    if (key === 'question') {
-                        el.style.transform = 'translateX(-50%)';
-                    } else {
-                        el.style.transform = 'translate(-50%, -50%)';
-                    }
-                    
-                    inputs[key].x.value = pos.x;
-                    inputs[key].y.value = pos.y;
-                }
-            });
+        function clamp(value, min, max) {
+            return Math.max(min, Math.min(max, value));
         }
 
-        layoutRep.on('change', (newVal) => {
-            updatePositions(newVal);
-        });
+        function renderPosition(x, y) {
+            dragQuestion.style.left = `${pixelToPreview(x)}px`;
+            dragQuestion.style.top = `${pixelToPreview(y)}px`;
+            dragQuestion.style.transform = 'translateX(-50%)';
+        }
 
-        // Input change handlers
-        Object.keys(inputs).forEach(key => {
-            inputs[key].x.addEventListener('change', () => {
-                if (layoutRep.value) {
-                    const newX = parseInt(inputs[key].x.value) || 0;
-                    layoutRep.value[key].x = newX;
-                    if (key === 'team1' || key === 'team2') {
-                        applySymmetry(key, newX, layoutRep.value[key].y);
-                    }
-                }
-            });
-            inputs[key].y.addEventListener('change', () => {
-                if (layoutRep.value) {
-                    const newY = parseInt(inputs[key].y.value) || 0;
-                    layoutRep.value[key].y = newY;
-                    if (key === 'team1' || key === 'team2') {
-                        applySymmetry(key, layoutRep.value[key].x, newY);
-                    }
-                }
-            });
-        });
+        function updatePositions(layout) {
+            if (!layout || !layout.question) return;
 
-        // Drag functionality
-        Object.keys(draggables).forEach(key => {
-            const el = draggables[key];
-            
-            el.addEventListener('mousedown', (e) => {
-                activeDraggable = key;
-                el.classList.add('active');
-                const rect = el.getBoundingClientRect();
-                offsetX = e.clientX - rect.left;
-                offsetY = e.clientY - rect.top;
-                
-                if (key === 'question') {
-                    offsetX = rect.width / 2;
-                } else {
-                    // Team elements use center anchor
-                    offsetX = rect.width / 2;
-                    offsetY = rect.height / 2;
-                }
-                
-                e.preventDefault();
-            });
-        });
+            const { x, y } = layout.question;
+            renderPosition(x, y);
+            inputX.value = x;
+            inputY.value = y;
+        }
 
-        document.addEventListener('mousemove', (e) => {
-            if (!activeDraggable) return;
-            
-            const containerRect = previewContainer.getBoundingClientRect();
-            const el = draggables[activeDraggable];
-            
-            let previewX, previewY;
-            
-            if (activeDraggable === 'question') {
-                // Question uses center X anchor only
-                previewX = e.clientX - containerRect.left;
-                previewY = e.clientY - containerRect.top - offsetY;
-            } else {
-                // Team elements use center anchor for both X and Y
-                previewX = e.clientX - containerRect.left;
-                previewY = e.clientY - containerRect.top;
-            }
-            
-            // Clamp to preview bounds
-            previewX = Math.max(0, Math.min(PREVIEW_WIDTH, previewX));
-            previewY = Math.max(0, Math.min(PREVIEW_HEIGHT, previewY));
-            
-            el.style.left = `${previewX}px`;
-            el.style.top = `${previewY}px`;
-            
-            // Update inputs with pixel values
-            const pixelX = previewToPixel(previewX);
-            const pixelY = previewToPixel(previewY);
-            inputs[activeDraggable].x.value = pixelX;
-            inputs[activeDraggable].y.value = pixelY;
-        });
+        // Write the position back to the replicant, clamped to the canvas.
+        function commitPosition(x, y) {
+            const next = {
+                x: clamp(Math.round(x), 0, CANVAS_WIDTH),
+                y: clamp(Math.round(y), 0, CANVAS_HEIGHT)
+            };
 
-        document.addEventListener('mouseup', () => {
-            if (!activeDraggable) return;
-            
-            const el = draggables[activeDraggable];
-            el.classList.remove('active');
-            
-            // Save to replicant
             if (layoutRep.value) {
-                const pixelX = parseInt(inputs[activeDraggable].x.value) || 0;
-                const pixelY = parseInt(inputs[activeDraggable].y.value) || 0;
-                layoutRep.value[activeDraggable] = { x: pixelX, y: pixelY };
-                
-                // Apply symmetry for team elements
-                if (activeDraggable === 'team1' || activeDraggable === 'team2') {
-                    applySymmetry(activeDraggable, pixelX, pixelY);
-                }
+                layoutRep.value.question = next;
             }
-            
-            activeDraggable = null;
+            return next;
+        }
+
+        layoutRep.on('change', updatePositions);
+
+        [inputX, inputY].forEach(input => {
+            input.addEventListener('change', () => {
+                const x = parseInt(inputX.value, 10);
+                const y = parseInt(inputY.value, 10);
+                const committed = commitPosition(
+                    Number.isFinite(x) ? x : 0,
+                    Number.isFinite(y) ? y : 0
+                );
+                // Reflect the clamped values back into the inputs.
+                inputX.value = committed.x;
+                inputY.value = committed.y;
+            });
         });
+
+        // Pointer events rather than mouse events, so the preview also works on a
+        // touchscreen dashboard.
+        dragQuestion.addEventListener('pointerdown', (e) => {
+            dragging = true;
+            grabOffsetY = e.clientY - dragQuestion.getBoundingClientRect().top;
+            dragQuestion.classList.add('active');
+            dragQuestion.setPointerCapture(e.pointerId);
+            e.preventDefault();
+        });
+
+        dragQuestion.addEventListener('pointermove', (e) => {
+            if (!dragging) return;
+
+            const containerRect = previewContainer.getBoundingClientRect();
+            const previewX = clamp(e.clientX - containerRect.left, 0, PREVIEW_WIDTH);
+            const previewY = clamp(e.clientY - containerRect.top - grabOffsetY, 0, PREVIEW_HEIGHT);
+
+            renderPosition(previewToPixel(previewX), previewToPixel(previewY));
+            inputX.value = previewToPixel(previewX);
+            inputY.value = previewToPixel(previewY);
+        });
+
+        function endDrag(e) {
+            if (!dragging) return;
+            dragging = false;
+            dragQuestion.classList.remove('active');
+            if (dragQuestion.hasPointerCapture(e.pointerId)) {
+                dragQuestion.releasePointerCapture(e.pointerId);
+            }
+            commitPosition(parseInt(inputX.value, 10) || 0, parseInt(inputY.value, 10) || 0);
+        }
+
+        dragQuestion.addEventListener('pointerup', endDrag);
+        dragQuestion.addEventListener('pointercancel', endDrag);
 
         document.getElementById('resetLayout').addEventListener('click', () => {
             layoutRep.value = {
-                team1: { x: 250, y: 100 },
-                team2: { x: 1670, y: 100 },
-                question: { x: 960, y: 600 }
+                ...(layoutRep.value || {}),
+                question: { ...DEFAULT_LAYOUT.question }
             };
         });
     </script>

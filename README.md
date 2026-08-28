@@ -6,7 +6,7 @@ A NodeCG bundle for displaying a quiz with score tracking for two teams.
 
 *   **Two-Team Score Tracking**: Manage scores for two competing teams.
 *   **Multiple Question Types**: Supports multiple-choice, true/false, and open-ended questions.
-*   **Dynamic Question Loading**: Load quiz questions from JSON files.
+*   **Dynamic Question Loading**: Load quiz questions from JSON files, with the file checked on load and any problems reported in the log and in the control panel.
 *   **Controllable Overlay**: Show/hide questions, reveal answers, and manage game state from the NodeCG dashboard.
 *   **Customizable Layout**: Adjust team names, colors, and logos.
 *   **HTTP API**: Control the quiz programmatically via an HTTP API, compatible with tools like Bitfocus Companion.
@@ -33,11 +33,11 @@ The bundle is managed through several dashboard panels:
 *   **Display Settings**: Customize the appearance of the overlay.
     *   Change team names and colors.
     *   Set a custom logo.
-*   **Layout Editor**: Fine-tune the position and appearance of elements on the overlay.
+*   **Layout Editor**: Position the question card on the stream overlay. The team scores are rendered inside the card's header, so they move with it and have no position of their own.
 
 ## Question File Format
 
-Quiz questions are stored in JSON files located in the `questions/` directory. You can create multiple files for different quizzes.
+Quiz questions are stored in JSON files located in the `questions/` directory. You can create multiple files for different quizzes. A working `questions/example.json` ships with the bundle - copy it as a starting point. Your own question files in `questions/` are git-ignored.
 
 The JSON file should contain a single object with a `questions` key, which is an array of question objects.
 
@@ -97,6 +97,18 @@ The JSON file should contain a single object with a `questions` key, which is an
 
 **Note**: The `phase` property is optional and can be used to group questions into different stages of the quiz.
 
+### Validation
+
+Question files are hand-written, so every file is checked when it loads. Anything
+suspicious - a missing `text`, a `correctAnswer` pointing past the end of
+`propositions`, an unknown `type`, a `threeWordsClue` without `clues` - is
+reported as a warning in the NodeCG log and marked with a ⚠ next to the question in
+the Quiz Control panel, with the details shown in the question preview.
+
+Questions with problems are still loaded rather than skipped, so question numbers
+never shift underneath you mid-show. A file that is not valid JSON at all is
+rejected outright and the previously loaded questions are cleared.
+
 ## HTTP API
 
 The bundle exposes an HTTP API at `/quiz-overlay/api/` for advanced control. This allows for integration with external software like Bitfocus Companion.
@@ -135,6 +147,15 @@ Simulate a team pressing an answer button (A, B, C, or D). This handles scoring 
 
 #### Settings
 *   `POST /api/settings/revealOnWrong?enabled=true`: Enable/disable revealing the correct answer when a wrong answer is selected.
+
+## Development
+
+The bundle has no runtime dependencies. To run the unit tests for the question
+parsing and validation logic:
+
+```sh
+npm test
+```
 
 ## Assets
 

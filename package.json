@@ -2,6 +2,9 @@
   "name": "quiz-overlay",
   "version": "1.0.0",
   "description": "Quiz overlay bundle with score tracking for two teams",
+  "scripts": {
+    "test": "node --test"
+  },
   "nodecg": {
     "compatibleRange": "^2.0.0",
     "assetCategories": [

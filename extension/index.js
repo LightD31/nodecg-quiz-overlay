@@ -3,6 +3,9 @@
 const fs = require('fs');
 const path = require('path');
 
+const { normalizeQuestion, buildQuestionState } = require('./questions');
+
+
 module.exports = function (nodecg) {
     const questionsRep = nodecg.Replicant('questionsList', {
         defaultValue: []
@@ -19,7 +22,6 @@ module.exports = function (nodecg) {
             showCorrectOnWrong: false,
             lastWrongAnswer: -1,
             type: 'multipleChoice', // 'multipleChoice', 'trueFalse', 'threeWordsClue', or 'funnySummary'
-            // New fields for additional question types
             clues: [], // For threeWordsClue - array of 3 word hints
             summary: '', // For funnySummary - the funny plot description
             answer: '', // For threeWordsClue and funnySummary - the correct answer text
@@ -41,36 +43,60 @@ module.exports = function (nodecg) {
     });
 
     const logoUrlRep = nodecg.Replicant('logoUrl', { defaultValue: '' });
-    const backgroundColorRep = nodecg.Replicant('backgroundColor', { defaultValue: '#1a1a2e' });
-    
-    let currentQuestionIndex = -1;
+
+    // Index of the question currently loaded into `question`, or -1 if none.
+    // This is a replicant so the dashboard can show which question is live
+    // instead of tracking its own copy and drifting out of sync.
+    const currentIndexRep = nodecg.Replicant('currentQuestionIndex', { defaultValue: -1 });
+
     const questionsDir = path.join(__dirname, '..', 'questions');
 
     // Get list of available question files
     function getQuestionFiles() {
         const files = [];
-        
+
         // Check for questions.json in bundle root
         const rootFile = path.join(__dirname, '..', 'questions.json');
         if (fs.existsSync(rootFile)) {
             files.push({ name: 'questions.json', path: rootFile, isDefault: true });
         }
-        
+
         // Check questions folder
         if (fs.existsSync(questionsDir)) {
             const dirFiles = fs.readdirSync(questionsDir);
             dirFiles.forEach(file => {
                 if (file.endsWith('.json')) {
-                    files.push({ 
-                        name: file, 
+                    files.push({
+                        name: file,
                         path: path.join(questionsDir, file),
-                        isDefault: false 
+                        isDefault: false
                     });
                 }
             });
         }
-        
+
         return files;
+    }
+
+    // The reveal-on-wrong setting rides along on the question replicant, so carry
+    // it across question changes instead of resetting it.
+    function currentRevealOnWrong() {
+        return questionRep.value && questionRep.value.revealOnWrong !== undefined
+            ? questionRep.value.revealOnWrong
+            : true;
+    }
+
+    // Load a question by index into the question replicant. Returns false if the
+    // index is out of range.
+    function showQuestionAt(index, state) {
+        const question = questionsRep.value[index];
+        if (!question) {
+            return false;
+        }
+
+        currentIndexRep.value = index;
+        questionRep.value = buildQuestionState(question, state, currentRevealOnWrong());
+        return true;
     }
 
     // Load questions from a specific file
@@ -78,45 +104,45 @@ module.exports = function (nodecg) {
         try {
             const data = fs.readFileSync(filePath, 'utf8');
             const parsed = JSON.parse(data);
-            questionsRep.value = parsed.questions || [];
-            
-            // Update current file in replicant
+            const rawQuestions = Array.isArray(parsed) ? parsed : parsed && parsed.questions;
+
+            if (!Array.isArray(rawQuestions)) {
+                throw new Error('file must contain a "questions" array');
+            }
+
+            questionsRep.value = rawQuestions.map(normalizeQuestion);
+
             const fileName = path.basename(filePath);
             questionFilesRep.value = {
                 ...questionFilesRep.value,
                 currentFile: fileName
             };
-            
+
             nodecg.log.info(`Loaded ${questionsRep.value.length} questions from ${fileName}`);
-            
+
+            // Report anything suspicious once, with the question number, so the
+            // operator can fix the file instead of discovering it mid-show.
+            const flagged = questionsRep.value.filter(q => q.issues.length > 0);
+            if (flagged.length > 0) {
+                nodecg.log.warn(`${flagged.length} of ${questionsRep.value.length} questions in ${fileName} have problems:`);
+                questionsRep.value.forEach((q, i) => {
+                    q.issues.forEach(issue => nodecg.log.warn(`  Question ${i + 1}: ${issue}`));
+                });
+            }
+
             // Auto-select first question (hidden, no feedback states)
             if (questionsRep.value.length > 0) {
-                const q = questionsRep.value[0];
-                currentQuestionIndex = 0;
-                questionRep.value = {
-                    text: q.text,
-                    propositions: q.propositions ? [...q.propositions] : [],
-                    correctAnswer: q.correctAnswer !== undefined ? q.correctAnswer : -1,
-                    state: 'hidden',
-                    eliminatedAnswers: [],
-                    answeredCorrectly: false,
-                    revealOnWrong: true,
-                    showCorrectOnWrong: false,
-                    lastWrongAnswer: -1,
-                    type: q.type || 'multipleChoice',
-                    clues: q.clues ? [...q.clues] : [],
-                    summary: q.summary || '',
-                    answer: q.answer || '',
-                    phase: q.phase || 1,
-                    openWrongTeam: ''
-                };
+                showQuestionAt(0, 'hidden');
                 nodecg.log.info('First question pre-selected (hidden)');
+            } else {
+                currentIndexRep.value = -1;
             }
-            
+
             return true;
         } catch (error) {
-            nodecg.log.error('Failed to load questions:', error.message);
+            nodecg.log.error(`Failed to load ${path.basename(filePath)}:`, error.message);
             questionsRep.value = [];
+            currentIndexRep.value = -1;
             return false;
         }
     }
@@ -124,7 +150,7 @@ module.exports = function (nodecg) {
     // Legacy function - loads default questions.json or first available file
     function loadQuestions() {
         const questionsPath = path.join(__dirname, '..', 'questions.json');
-        
+
         // Check if default file exists
         if (fs.existsSync(questionsPath)) {
             loadQuestionsFromFile(questionsPath);
@@ -171,29 +197,29 @@ module.exports = function (nodecg) {
             loadQuestions();
         });
     }
-    
+
     // ========================================
     // HTTP API for Bitfocus Companion
     // ========================================
     const router = nodecg.Router();
-    
+
     // Helper to send JSON response
     function sendJson(res, data) {
         res.setHeader('Content-Type', 'application/json');
         res.send(JSON.stringify(data));
     }
-    
+
     // GET /api/status - Get current state
     router.get('/api/status', (req, res) => {
         sendJson(res, {
-            currentQuestion: currentQuestionIndex,
+            currentQuestion: currentIndexRep.value,
             totalQuestions: questionsRep.value.length,
             questionState: questionRep.value.state,
             scores: scoresRep.value,
             currentFile: questionFilesRep.value.currentFile
         });
     });
-    
+
     // GET /api/files - Get list of available question files
     router.get('/api/files', (req, res) => {
         refreshFileList();
@@ -202,22 +228,21 @@ module.exports = function (nodecg) {
             currentFile: questionFilesRep.value.currentFile
         });
     });
-    
+
     // POST /api/files/load/:filename - Load a specific question file
     router.post('/api/files/load/:filename', (req, res) => {
         const filename = req.params.filename;
         const files = getQuestionFiles();
         const file = files.find(f => f.name === filename);
-        
+
         if (!file) {
             return sendJson(res, { error: 'File not found' });
         }
-        
+
         const success = loadQuestionsFromFile(file.path);
         if (success) {
-            currentQuestionIndex = 0;
-            sendJson(res, { 
-                success: true, 
+            sendJson(res, {
+                success: true,
                 file: filename,
                 questionsCount: questionsRep.value.length
             });
@@ -225,112 +250,49 @@ module.exports = function (nodecg) {
             sendJson(res, { error: 'Failed to load file' });
         }
     });
-    
+
     // POST /api/files/refresh - Refresh the file list
     router.post('/api/files/refresh', (req, res) => {
         refreshFileList();
-        sendJson(res, { 
+        sendJson(res, {
             success: true,
             files: questionFilesRep.value.files
         });
     });
-    
+
     // POST /api/question/show/:index - Load and show a specific question
     router.post('/api/question/show/:index', (req, res) => {
-        const index = parseInt(req.params.index);
-        if (index < 0 || index >= questionsRep.value.length) {
+        const index = parseInt(req.params.index, 10);
+        if (!Number.isInteger(index) || !showQuestionAt(index, 'showing')) {
             return sendJson(res, { error: 'Invalid question index' });
         }
-        
-        const q = questionsRep.value[index];
-        currentQuestionIndex = index;
-        const revealOnWrong = questionRep.value ? questionRep.value.revealOnWrong : true;
-        questionRep.value = {
-            text: q.text,
-            propositions: q.propositions ? [...q.propositions] : [],
-            correctAnswer: q.correctAnswer !== undefined ? q.correctAnswer : -1,
-            state: 'showing',
-            eliminatedAnswers: [],
-            answeredCorrectly: false,
-            revealOnWrong: revealOnWrong,
-            showCorrectOnWrong: false,
-            lastWrongAnswer: -1,
-            type: q.type || 'multipleChoice',
-            clues: q.clues ? [...q.clues] : [],
-            summary: q.summary || '',
-            answer: q.answer || '',
-            phase: q.phase || 1,
-            openWrongTeam: ''
-        };
-        
+
         nodecg.log.info(`[API] Showing question ${index + 1}`);
         sendJson(res, { success: true, question: index + 1 });
     });
-    
+
     // POST /api/question/next - Show next question
     router.post('/api/question/next', (req, res) => {
-        const nextIndex = currentQuestionIndex + 1;
-        if (nextIndex >= questionsRep.value.length) {
+        const nextIndex = currentIndexRep.value + 1;
+        if (!showQuestionAt(nextIndex, 'showing')) {
             return sendJson(res, { error: 'No more questions' });
         }
-        
-        const q = questionsRep.value[nextIndex];
-        currentQuestionIndex = nextIndex;
-        const revealOnWrong = questionRep.value ? questionRep.value.revealOnWrong : true;
-        questionRep.value = {
-            text: q.text,
-            propositions: q.propositions ? [...q.propositions] : [],
-            correctAnswer: q.correctAnswer !== undefined ? q.correctAnswer : -1,
-            state: 'showing',
-            eliminatedAnswers: [],
-            answeredCorrectly: false,
-            revealOnWrong: revealOnWrong,
-            showCorrectOnWrong: false,
-            lastWrongAnswer: -1,
-            type: q.type || 'multipleChoice',
-            clues: q.clues ? [...q.clues] : [],
-            summary: q.summary || '',
-            answer: q.answer || '',
-            phase: q.phase || 1,
-            openWrongTeam: ''
-        };
-        
+
         nodecg.log.info(`[API] Showing next question ${nextIndex + 1}`);
         sendJson(res, { success: true, question: nextIndex + 1 });
     });
-    
+
     // POST /api/question/previous - Show previous question
     router.post('/api/question/previous', (req, res) => {
-        const prevIndex = currentQuestionIndex - 1;
-        if (prevIndex < 0) {
+        const prevIndex = currentIndexRep.value - 1;
+        if (prevIndex < 0 || !showQuestionAt(prevIndex, 'showing')) {
             return sendJson(res, { error: 'Already at first question' });
         }
-        
-        const q = questionsRep.value[prevIndex];
-        currentQuestionIndex = prevIndex;
-        const revealOnWrong = questionRep.value ? questionRep.value.revealOnWrong : true;
-        questionRep.value = {
-            text: q.text,
-            propositions: q.propositions ? [...q.propositions] : [],
-            correctAnswer: q.correctAnswer !== undefined ? q.correctAnswer : -1,
-            state: 'showing',
-            eliminatedAnswers: [],
-            answeredCorrectly: false,
-            revealOnWrong: revealOnWrong,
-            showCorrectOnWrong: false,
-            lastWrongAnswer: -1,
-            type: q.type || 'multipleChoice',
-            clues: q.clues ? [...q.clues] : [],
-            summary: q.summary || '',
-            answer: q.answer || '',
-            phase: q.phase || 1,
-            openWrongTeam: ''
-        };
-        
+
         nodecg.log.info(`[API] Showing previous question ${prevIndex + 1}`);
         sendJson(res, { success: true, question: prevIndex + 1 });
     });
-    
+
     // POST /api/question/reveal - Reveal the answer
     router.post('/api/question/reveal', (req, res) => {
         if (questionRep.value) {
@@ -341,20 +303,23 @@ module.exports = function (nodecg) {
             sendJson(res, { error: 'No question loaded' });
         }
     });
-    
+
     // POST /api/question/openWrong/:team - Mark a team as having answered wrong on open question
     router.post('/api/question/openWrong/:team', (req, res) => {
         if (questionRep.value) {
             const team = req.params.team;
+            if (team !== 'team1' && team !== 'team2') {
+                return sendJson(res, { error: 'Unknown team' });
+            }
             questionRep.value.openWrongTeam = team;
-            const teamName = scoresRep.value ? scoresRep.value[team]?.name : team;
+            const teamName = scoresRep.value ? scoresRep.value[team].name : team;
             nodecg.log.info(`[API] Open question wrong answer by ${teamName}`);
             sendJson(res, { success: true, team: teamName });
         } else {
             sendJson(res, { error: 'No question loaded' });
         }
     });
-    
+
     // POST /api/question/clearWrong - Clear the wrong feedback for open questions
     router.post('/api/question/clearWrong', (req, res) => {
         if (questionRep.value) {
@@ -365,7 +330,7 @@ module.exports = function (nodecg) {
             sendJson(res, { error: 'No question loaded' });
         }
     });
-    
+
     // POST /api/settings/revealOnWrong - Toggle reveal on wrong setting
     router.post('/api/settings/revealOnWrong', (req, res) => {
         if (questionRep.value) {
@@ -377,7 +342,7 @@ module.exports = function (nodecg) {
             sendJson(res, { error: 'Question replicant not ready' });
         }
     });
-    
+
     // POST /api/question/hide - Hide the question
     router.post('/api/question/hide', (req, res) => {
         if (questionRep.value) {
@@ -388,7 +353,7 @@ module.exports = function (nodecg) {
             sendJson(res, { error: 'No question loaded' });
         }
     });
-    
+
     // POST /api/question/show - Show/restore the current question
     router.post('/api/question/show', (req, res) => {
         if (questionRep.value && questionRep.value.text) {
@@ -399,43 +364,34 @@ module.exports = function (nodecg) {
             sendJson(res, { error: 'No question loaded' });
         }
     });
-    
-    // POST /api/score/team1/add - Add point to team 1
-    router.post('/api/score/team1/add', (req, res) => {
-        if (scoresRep.value) {
-            scoresRep.value.team1.score++;
-            nodecg.log.info(`[API] Team 1 score: ${scoresRep.value.team1.score}`);
-            sendJson(res, { success: true, score: scoresRep.value.team1.score });
+
+    // ========================================
+    // Score Endpoints
+    // ========================================
+
+    function adjustScore(team, delta, res) {
+        if (!scoresRep.value || !scoresRep.value[team]) {
+            return sendJson(res, { error: 'Unknown team' });
         }
-    });
-    
-    // POST /api/score/team1/sub - Subtract point from team 1
-    router.post('/api/score/team1/sub', (req, res) => {
-        if (scoresRep.value) {
-            scoresRep.value.team1.score = Math.max(0, scoresRep.value.team1.score - 1);
-            nodecg.log.info(`[API] Team 1 score: ${scoresRep.value.team1.score}`);
-            sendJson(res, { success: true, score: scoresRep.value.team1.score });
+
+        scoresRep.value[team].score = Math.max(0, scoresRep.value[team].score + delta);
+        nodecg.log.info(`[API] ${scoresRep.value[team].name} score: ${scoresRep.value[team].score}`);
+        sendJson(res, { success: true, score: scoresRep.value[team].score });
+    }
+
+    // POST /api/score/:team/add - Add a point to a team
+    // POST /api/score/:team/sub - Subtract a point from a team
+    router.post('/api/score/:team/:action', (req, res) => {
+        const { team, action } = req.params;
+        if (team !== 'team1' && team !== 'team2') {
+            return sendJson(res, { error: 'Unknown team - expected team1 or team2' });
         }
-    });
-    
-    // POST /api/score/team2/add - Add point to team 2
-    router.post('/api/score/team2/add', (req, res) => {
-        if (scoresRep.value) {
-            scoresRep.value.team2.score++;
-            nodecg.log.info(`[API] Team 2 score: ${scoresRep.value.team2.score}`);
-            sendJson(res, { success: true, score: scoresRep.value.team2.score });
+        if (action !== 'add' && action !== 'sub') {
+            return sendJson(res, { error: 'Unknown action - expected add or sub' });
         }
+        adjustScore(team, action === 'add' ? 1 : -1, res);
     });
-    
-    // POST /api/score/team2/sub - Subtract point from team 2
-    router.post('/api/score/team2/sub', (req, res) => {
-        if (scoresRep.value) {
-            scoresRep.value.team2.score = Math.max(0, scoresRep.value.team2.score - 1);
-            nodecg.log.info(`[API] Team 2 score: ${scoresRep.value.team2.score}`);
-            sendJson(res, { success: true, score: scoresRep.value.team2.score });
-        }
-    });
-    
+
     // POST /api/score/reset - Reset both scores
     router.post('/api/score/reset', (req, res) => {
         if (scoresRep.value) {
@@ -445,34 +401,42 @@ module.exports = function (nodecg) {
             sendJson(res, { success: true });
         }
     });
-    
+
     // ========================================
     // Team Answer Endpoints (auto-scoring)
     // ========================================
-    
+
     // Helper to process team answer
     function processAnswer(team, answerIndex, res) {
         if (!questionRep.value || !questionRep.value.text) {
             return sendJson(res, { error: 'No question active' });
         }
-        
+
         if (questionRep.value.state === 'revealed' || questionRep.value.answeredCorrectly) {
             return sendJson(res, { error: 'Answer already revealed' });
         }
-        
+
         // Check if this answer is already eliminated
         if (questionRep.value.eliminatedAnswers && questionRep.value.eliminatedAnswers.includes(answerIndex)) {
             return sendJson(res, { error: 'Answer already eliminated' });
         }
-        
-        // For True/False questions, only allow answers 0 (True) or 1 (False)
+
+        // True/False always offers exactly two buttons; everything else is bounded
+        // by how many propositions the question actually has.
         const isTrueFalse = questionRep.value.type === 'trueFalse';
-        if (isTrueFalse && answerIndex > 1) {
-            return sendJson(res, { error: 'Invalid answer for True/False question' });
+        const propositions = questionRep.value.propositions || [];
+        const answerCount = isTrueFalse ? 2 : Math.min(propositions.length, 4);
+
+        if (answerCount === 0) {
+            return sendJson(res, { error: 'This question is answered verbally - use /api/score or /api/question/openWrong' });
         }
-        
+
+        if (answerIndex >= answerCount) {
+            return sendJson(res, { error: `Invalid answer - this question only has ${answerCount} options` });
+        }
+
         const isCorrect = answerIndex === questionRep.value.correctAnswer;
-        
+
         // Get answer label based on question type
         let answerLabel;
         let correctAnswerLabel;
@@ -481,14 +445,16 @@ module.exports = function (nodecg) {
             correctAnswerLabel = questionRep.value.correctAnswer === 0 ? 'Vrai' : 'Faux';
         } else {
             answerLabel = String.fromCharCode(65 + answerIndex); // 0=A, 1=B, 2=C, 3=D
-            correctAnswerLabel = String.fromCharCode(65 + questionRep.value.correctAnswer);
+            correctAnswerLabel = questionRep.value.correctAnswer >= 0
+                ? String.fromCharCode(65 + questionRep.value.correctAnswer)
+                : '?';
         }
-        
+
         if (isCorrect) {
             // Correct answer - reveal and lock
             questionRep.value.state = 'revealed';
             questionRep.value.answeredCorrectly = true;
-            
+
             // Update score
             if (scoresRep.value) {
                 scoresRep.value[team].score++;
@@ -500,16 +466,16 @@ module.exports = function (nodecg) {
             }
             questionRep.value.lastWrongAnswer = answerIndex;
             questionRep.value.eliminatedAnswers = [...questionRep.value.eliminatedAnswers, answerIndex];
-            
+
             // If revealOnWrong is enabled, show the correct answer
             if (questionRep.value.revealOnWrong) {
                 questionRep.value.showCorrectOnWrong = true;
             }
         }
-        
+
         const teamName = scoresRep.value ? scoresRep.value[team].name : team;
         nodecg.log.info(`[API] ${teamName} answered ${answerLabel} - ${isCorrect ? 'CORRECT!' : 'Wrong'}`);
-        
+
         sendJson(res, {
             success: true,
             team: teamName,
@@ -520,19 +486,19 @@ module.exports = function (nodecg) {
             eliminatedAnswers: questionRep.value.eliminatedAnswers || []
         });
     }
-    
-    // Team 1 answers
-    router.post('/api/team1/answer/a', (req, res) => processAnswer('team1', 0, res));
-    router.post('/api/team1/answer/b', (req, res) => processAnswer('team1', 1, res));
-    router.post('/api/team1/answer/c', (req, res) => processAnswer('team1', 2, res));
-    router.post('/api/team1/answer/d', (req, res) => processAnswer('team1', 3, res));
-    
-    // Team 2 answers
-    router.post('/api/team2/answer/a', (req, res) => processAnswer('team2', 0, res));
-    router.post('/api/team2/answer/b', (req, res) => processAnswer('team2', 1, res));
-    router.post('/api/team2/answer/c', (req, res) => processAnswer('team2', 2, res));
-    router.post('/api/team2/answer/d', (req, res) => processAnswer('team2', 3, res));
-    
+
+    // POST /api/team1/answer/:option and /api/team2/answer/:option (a, b, c or d)
+    router.post('/api/:team/answer/:option', (req, res) => {
+        const { team, option } = req.params;
+        if (team !== 'team1' && team !== 'team2') {
+            return sendJson(res, { error: 'Unknown team - expected team1 or team2' });
+        }
+        if (!/^[a-d]$/.test(option)) {
+            return sendJson(res, { error: 'Unknown answer - expected a, b, c or d' });
+        }
+        processAnswer(team, option.charCodeAt(0) - 97, res); // a=0, b=1, c=2, d=3
+    });
+
     // Mount the router
     nodecg.mount('/quiz-overlay', router);
     nodecg.log.info('HTTP API mounted at /quiz-overlay/api/');
