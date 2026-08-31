@@ -179,23 +179,27 @@ module.exports = function (nodecg) {
     refreshFileList();
     loadQuestions();
 
-    // Watch questions folder for changes
+    // Watch questions folder for changes. The watchers are unref'd so they never
+    // hold the process open on their own - NodeCG's server keeps it alive, and
+    // this way the extension can also be loaded by a test run that then exits.
     if (fs.existsSync(questionsDir)) {
-        fs.watch(questionsDir, (eventType, filename) => {
+        const dirWatcher = fs.watch(questionsDir, (eventType, filename) => {
             if (filename && filename.endsWith('.json')) {
                 nodecg.log.info('Questions folder changed, refreshing file list...');
                 refreshFileList();
             }
         });
+        dirWatcher.unref();
     }
 
     // Watch for default file changes (only if it exists)
     const questionsPath = path.join(__dirname, '..', 'questions.json');
     if (fs.existsSync(questionsPath)) {
-        fs.watchFile(questionsPath, () => {
+        const fileWatcher = fs.watchFile(questionsPath, () => {
             nodecg.log.info('Questions file changed, reloading...');
             loadQuestions();
         });
+        fileWatcher.unref();
     }
 
     // ========================================
@@ -203,10 +207,28 @@ module.exports = function (nodecg) {
     // ========================================
     const router = nodecg.Router();
 
-    // Helper to send JSON response
-    function sendJson(res, data) {
-        res.setHeader('Content-Type', 'application/json');
-        res.send(JSON.stringify(data));
+    // Helper to send a JSON response.
+    //
+    // Every endpoint answers with a status code that says what happened, so a
+    // client (Bitfocus Companion, a stream deck macro, curl) can tell a refusal
+    // from a success without parsing the body:
+    //
+    //   200  the request was carried out
+    //   400  the request itself is malformed - an unknown team, a bad option
+    //   404  the thing addressed does not exist - no such file, no such question
+    //   409  the request is understood but conflicts with the current state -
+    //        nothing is loaded, the answer is already revealed, no next question
+    //   422  the question file exists but could not be parsed
+    //   503  a replicant is not ready yet
+    //
+    // The body shape is unchanged: { success: true, ... } or { error: '...' }.
+    function sendJson(res, data, status = 200) {
+        res.status(status).json(data);
+    }
+
+    // Refuse a request with a status code and an explanation.
+    function sendError(res, status, message) {
+        return sendJson(res, { error: message }, status);
     }
 
     // GET /api/status - Get current state
@@ -236,7 +258,7 @@ module.exports = function (nodecg) {
         const file = files.find(f => f.name === filename);
 
         if (!file) {
-            return sendJson(res, { error: 'File not found' });
+            return sendError(res, 404, 'File not found');
         }
 
         const success = loadQuestionsFromFile(file.path);
@@ -247,7 +269,7 @@ module.exports = function (nodecg) {
                 questionsCount: questionsRep.value.length
             });
         } else {
-            sendJson(res, { error: 'Failed to load file' });
+            sendError(res, 422, 'Failed to load file - it is not valid JSON, or has no "questions" array');
         }
     });
 
@@ -263,8 +285,14 @@ module.exports = function (nodecg) {
     // POST /api/question/show/:index - Load and show a specific question
     router.post('/api/question/show/:index', (req, res) => {
         const index = parseInt(req.params.index, 10);
-        if (!Number.isInteger(index) || !showQuestionAt(index, 'showing')) {
-            return sendJson(res, { error: 'Invalid question index' });
+
+        // A non-numeric index is a bad request; a numeric one that is simply out
+        // of range means that question does not exist.
+        if (!Number.isInteger(index)) {
+            return sendError(res, 400, 'Invalid question index - expected a number');
+        }
+        if (!showQuestionAt(index, 'showing')) {
+            return sendError(res, 404, `No question at index ${index} - ${questionsRep.value.length} question(s) loaded`);
         }
 
         nodecg.log.info(`[API] Showing question ${index + 1}`);
@@ -275,7 +303,7 @@ module.exports = function (nodecg) {
     router.post('/api/question/next', (req, res) => {
         const nextIndex = currentIndexRep.value + 1;
         if (!showQuestionAt(nextIndex, 'showing')) {
-            return sendJson(res, { error: 'No more questions' });
+            return sendError(res, 409, 'No more questions');
         }
 
         nodecg.log.info(`[API] Showing next question ${nextIndex + 1}`);
@@ -286,7 +314,7 @@ module.exports = function (nodecg) {
     router.post('/api/question/previous', (req, res) => {
         const prevIndex = currentIndexRep.value - 1;
         if (prevIndex < 0 || !showQuestionAt(prevIndex, 'showing')) {
-            return sendJson(res, { error: 'Already at first question' });
+            return sendError(res, 409, 'Already at first question');
         }
 
         nodecg.log.info(`[API] Showing previous question ${prevIndex + 1}`);
@@ -300,7 +328,7 @@ module.exports = function (nodecg) {
             nodecg.log.info('[API] Answer revealed');
             sendJson(res, { success: true });
         } else {
-            sendJson(res, { error: 'No question loaded' });
+            sendError(res, 409, 'No question loaded');
         }
     });
 
@@ -309,14 +337,14 @@ module.exports = function (nodecg) {
         if (questionRep.value) {
             const team = req.params.team;
             if (team !== 'team1' && team !== 'team2') {
-                return sendJson(res, { error: 'Unknown team' });
+                return sendError(res, 400, 'Unknown team - expected team1 or team2');
             }
             questionRep.value.openWrongTeam = team;
             const teamName = scoresRep.value ? scoresRep.value[team].name : team;
             nodecg.log.info(`[API] Open question wrong answer by ${teamName}`);
             sendJson(res, { success: true, team: teamName });
         } else {
-            sendJson(res, { error: 'No question loaded' });
+            sendError(res, 409, 'No question loaded');
         }
     });
 
@@ -327,7 +355,7 @@ module.exports = function (nodecg) {
             nodecg.log.info('[API] Cleared open question wrong feedback');
             sendJson(res, { success: true });
         } else {
-            sendJson(res, { error: 'No question loaded' });
+            sendError(res, 409, 'No question loaded');
         }
     });
 
@@ -339,7 +367,7 @@ module.exports = function (nodecg) {
             nodecg.log.info(`[API] Reveal on wrong: ${enabled}`);
             sendJson(res, { success: true, enabled });
         } else {
-            sendJson(res, { error: 'Question replicant not ready' });
+            sendError(res, 503, 'Question replicant not ready');
         }
     });
 
@@ -350,7 +378,7 @@ module.exports = function (nodecg) {
             nodecg.log.info('[API] Question hidden');
             sendJson(res, { success: true });
         } else {
-            sendJson(res, { error: 'No question loaded' });
+            sendError(res, 409, 'No question loaded');
         }
     });
 
@@ -361,7 +389,7 @@ module.exports = function (nodecg) {
             nodecg.log.info('[API] Question shown');
             sendJson(res, { success: true });
         } else {
-            sendJson(res, { error: 'No question loaded' });
+            sendError(res, 409, 'No question loaded');
         }
     });
 
@@ -370,8 +398,10 @@ module.exports = function (nodecg) {
     // ========================================
 
     function adjustScore(team, delta, res) {
+        // The route has already checked the team name, so a missing entry here
+        // means the replicant itself is not usable yet.
         if (!scoresRep.value || !scoresRep.value[team]) {
-            return sendJson(res, { error: 'Unknown team' });
+            return sendError(res, 503, 'Scores replicant not ready');
         }
 
         scoresRep.value[team].score = Math.max(0, scoresRep.value[team].score + delta);
@@ -384,22 +414,24 @@ module.exports = function (nodecg) {
     router.post('/api/score/:team/:action', (req, res) => {
         const { team, action } = req.params;
         if (team !== 'team1' && team !== 'team2') {
-            return sendJson(res, { error: 'Unknown team - expected team1 or team2' });
+            return sendError(res, 400, 'Unknown team - expected team1 or team2');
         }
         if (action !== 'add' && action !== 'sub') {
-            return sendJson(res, { error: 'Unknown action - expected add or sub' });
+            return sendError(res, 400, 'Unknown action - expected add or sub');
         }
         adjustScore(team, action === 'add' ? 1 : -1, res);
     });
 
     // POST /api/score/reset - Reset both scores
     router.post('/api/score/reset', (req, res) => {
-        if (scoresRep.value) {
-            scoresRep.value.team1.score = 0;
-            scoresRep.value.team2.score = 0;
-            nodecg.log.info('[API] Scores reset');
-            sendJson(res, { success: true });
+        if (!scoresRep.value) {
+            return sendError(res, 503, 'Scores replicant not ready');
         }
+
+        scoresRep.value.team1.score = 0;
+        scoresRep.value.team2.score = 0;
+        nodecg.log.info('[API] Scores reset');
+        sendJson(res, { success: true });
     });
 
     // ========================================
@@ -409,16 +441,16 @@ module.exports = function (nodecg) {
     // Helper to process team answer
     function processAnswer(team, answerIndex, res) {
         if (!questionRep.value || !questionRep.value.text) {
-            return sendJson(res, { error: 'No question active' });
+            return sendError(res, 409, 'No question active');
         }
 
         if (questionRep.value.state === 'revealed' || questionRep.value.answeredCorrectly) {
-            return sendJson(res, { error: 'Answer already revealed' });
+            return sendError(res, 409, 'Answer already revealed');
         }
 
         // Check if this answer is already eliminated
         if (questionRep.value.eliminatedAnswers && questionRep.value.eliminatedAnswers.includes(answerIndex)) {
-            return sendJson(res, { error: 'Answer already eliminated' });
+            return sendError(res, 409, 'Answer already eliminated');
         }
 
         // True/False always offers exactly two buttons; everything else is bounded
@@ -428,11 +460,11 @@ module.exports = function (nodecg) {
         const answerCount = isTrueFalse ? 2 : Math.min(propositions.length, 4);
 
         if (answerCount === 0) {
-            return sendJson(res, { error: 'This question is answered verbally - use /api/score or /api/question/openWrong' });
+            return sendError(res, 409, 'This question is answered verbally - use /api/score or /api/question/openWrong');
         }
 
         if (answerIndex >= answerCount) {
-            return sendJson(res, { error: `Invalid answer - this question only has ${answerCount} options` });
+            return sendError(res, 409, `Invalid answer - this question only has ${answerCount} options`);
         }
 
         const isCorrect = answerIndex === questionRep.value.correctAnswer;
@@ -491,10 +523,10 @@ module.exports = function (nodecg) {
     router.post('/api/:team/answer/:option', (req, res) => {
         const { team, option } = req.params;
         if (team !== 'team1' && team !== 'team2') {
-            return sendJson(res, { error: 'Unknown team - expected team1 or team2' });
+            return sendError(res, 400, 'Unknown team - expected team1 or team2');
         }
         if (!/^[a-d]$/.test(option)) {
-            return sendJson(res, { error: 'Unknown answer - expected a, b, c or d' });
+            return sendError(res, 400, 'Unknown answer - expected a, b, c or d');
         }
         processAnswer(team, option.charCodeAt(0) - 97, res); // a=0, b=1, c=2, d=3
     });
